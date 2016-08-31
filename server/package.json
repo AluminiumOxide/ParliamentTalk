@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "watch": "mocha -R nyan --recursive tests/*",
-    "test": "istanbul cover _mocha --recursive tests/*",
+    "build": "babel . --ignore build,coverage,docs,node_modules --out-dir build",
+    "prestart": "npm run build && npm-install-changed",
+    "start": "node build/index.js",
+    "watch": "mocha -R nyan --recursive build/tests/*",
+    "pretest": "npm run build && npm-install-changed",
+    "test": "istanbul cover _mocha --recursive build/tests/*",
     "doc": "jsdoc -d docs/ -r src/*"
   },
   "author": "Sapphyre Gervais",
@@ -22,9 +25,11 @@
     "when": "^3.7.7"
   },
   "devDependencies": {
+    "babel-cli": "^6.14.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
+    "npm-install-changed": "^1.2.1",
     "sinon": "^1.17.5"
   }
 }
