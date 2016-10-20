@@ -71,7 +71,6 @@ Account.signUp = function(req, res) {
 				<li> 201 on success, with json body: {token: string} </li>
  */
 Account.signIn = function(req, res) {
-	//return when(User.findOne({name:req.body.name}))
 	return when(User.findOne({name:req.body.name}).exec())
 		.then(user => {
 			if(!user) {
@@ -102,26 +101,60 @@ Account.signIn = function(req, res) {
 				<li> 201 on success, with json body: {} </li>
  */
 Account.signOut = function(req, res) {
-	if(req.headers['x-access-token']) {
-		return when(User.verifyLogin(req.headers['x-access-token']))
-				.then(user => {
-					if(!user) {
-						return res.status(400).json({error: 'invalid token'});
-					}
-					user.login = {};
-					return when(user.save())
-						.then(() => {
-							return res.status(201).json({});
-						})
-						.otherwise(err => {
-							return res.status(400).json({error: 'invalid token'});
-						});
+	return when(verifyLogin(req))
+		.then(user => {
+			user.login = {};
+			return when(user.save())
+				.then(() => {
+					return res.status(201).json({});
 				})
 				.otherwise(err => {
 					return res.status(400).json({error: 'invalid token'});
 				});
-	} else {
-		return res.status(400).json({error: 'invalid token'});
-	}					
+		})
+		.otherwise(err => {
+			return res.status(400).json({error: 'invalid token'});
+		});
 };
 
+/**
+ * View user data
+ * @param {http.request} req - The request object, with x-access-token headers set
+ * @param {http.response} res - The response object:
+ * 				<li> 400 if invalid token, with json body: {error: string} </li>
+ * 				<li> 201 on success, with json body: { _id: string, name: string, email: string } </li>
+ */
+Account.view = function(req,res) {
+	return when(verifyLogin(req))
+		.then(user => {
+			delete user['password'];
+			return res.status(200).json(user);
+		})
+		.otherwise(err => {
+			return res.status(400).json({});
+		});
+};
+
+//Account.update = function(req,res) {
+//};
+//
+//Account.destroy = function(req,res) {
+//};
+
+var verifyLogin = function(req) {
+	if(req.headers['x-access-token']) {
+		return when(User.verifyLogin(req.headers['x-access-token']))
+				.then(user => {
+					if(!user) {
+						return when.reject();
+					}
+					return when.resolve(user);
+				})
+				.otherwise(err => {
+					return when.reject();
+				});
+	} else {
+		return when.reject();
+	}					
+
+};

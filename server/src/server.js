@@ -47,17 +47,21 @@ app.post('/signUp', upload.array(), function(req, res) {
 	AccountController.signUp(req, res);
 });
 
+// get account data
+app.get('/account/', function(req, res) {
+	AccountController.view(req, res);
+});
+
 // recover account
 // verify account
-
 // update account
-// get account data
 
-// get bill data
 
 // get vote data
 // get vote token
 // cast ballot
+
+// get bill data
 
 /*** Run App ***/
 app.listen(3000, function() {

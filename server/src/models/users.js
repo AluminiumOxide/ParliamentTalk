@@ -240,6 +240,7 @@ User.methods.generateLogin = function() {
 	this.login.timestamp = new Date();
 	return when(this.save())
 		.then(() => {
+console.log('save',this);
 			var idObj = {'id':this._id};
 			return this.name+"-"+jwt.sign(idObj, this.login.code);
 		})
@@ -255,10 +256,11 @@ User.methods.generateLogin = function() {
  * @returns {boolean|User} - user if valid, false otherwise
  */
 User.statics.verifyLogin = function(tokenstr) {
+console.log("verify login");
 	var tokenarr = tokenstr.split('-',2);
 	var name = tokenarr[0];
 	var token = tokenarr[1];
-	return when(User.findOne({name: name}))
+	return when(User.findOne({name: name}).exec())
 		.then(user => {
 			if(!user) {
 				return false;
