@@ -1,42 +1,55 @@
 var mongoose = require('mongoose');
+var jwt = require('jsonwebtoken');
 var when = require('when');
 var bcrypt = require('bcrypt');
 
+/**
+ * @class
+ * A model to represent user accounts
+ */
 var User = new mongoose.Schema({
 
 	/** 
 	 * The user name
-	 * @property name
-	 * @type string 
-	 * @memberof User# 
+	 * @var {string} User.name
 	 */
 	name: String,
 
 	/** 
 	 * The user's email
-	 * @property email
 	 * @type string 
-	 * @memberof User# 
+	 * @memberOf User
 	 */
 	email: String,
 
 	/** 
 	 * The user's password: {salt: string, encrypted: string}
-	 * @property password 
 	 * @type object
-	 * @memberof User# 
+	 * @memberOf User
 	 */
 	password: {
 		salt: String,
 		encrypted: String
 	},
 
+	/** 
+	 * When the user was created
+	 * @type date 
+	 * @memberOf User
+	 */
+	created: Date,
+
+	/**
+	 * When the user was updated
+	 * @type date
+	 * @memberOf User
+	 */
+	updated: Date,
 
 	/** 
 	 * The user's verification info: {email: boolean, code: string}
-	 * @property verified
 	 * @type object
-	 * @memberof User# 
+	 * @memberOf User
 	 */
 	verified: {
 		email: { 
@@ -46,21 +59,15 @@ var User = new mongoose.Schema({
 		code: String
 	},
 
-	/** 
-	 * When the user was created
-	 * @property created
-	 * @type date 
-	 * @memberof User# 
-	 */
-	created: Date,
-
 	/**
-	 * When the user was updated
-	 * @property updated
-	 * @type date
-	 * @memberof User#
+	 * The user's login info: {code: string, timestamp: date}
+	 * @type object
+	 * @memberOf User
 	 */
-	updated: Date
+	login: {
+		code: String,
+		timestamp: Date
+	}
 
 });
 
@@ -206,7 +213,73 @@ User.methods.checkPassword = function(password) {
 };
 
 /**
- * @class
- * A model to represent user accounts
+ * Checks if the given password matches the user's password
+ * @function matchPassword
+ * @memberof User#
+ * @name matchPassword
+ * @param {string} password - The password to match
+ * @returns {boolean} Whether the password matches the user's password
  */
+User.methods.matchPassword = function(password) {
+	if(bcrypt.hashSync(password, this.password.salt) == this.password.encrypted) {
+		return true;
+	}
+	return false;
+};
+
+/**
+ * Generates and saves a login object
+ * @function generateLogin
+ * @memberof User#
+ * @name generateLogin
+ * @returns {string} - the user's auth token
+ */
+User.methods.generateLogin = function() {
+	this.login = {};
+	this.login.code = bcrypt.genSaltSync(10);
+	this.login.timestamp = new Date();
+	return when(this.save())
+		.then(() => {
+			var idObj = {'id':this._id};
+			return this.name+"-"+jwt.sign(idObj, this.login.code);
+		})
+		.otherwise(err => {
+			console.log("ERROR",err);
+		});
+};
+
+/**
+ * @function verifyLogin
+ * @memberof User
+ * @name verifyLogin
+ * @returns {boolean|User} - user if valid, false otherwise
+ */
+User.statics.verifyLogin = function(tokenstr) {
+	var tokenarr = tokenstr.split('-',2);
+	var name = tokenarr[0];
+	var token = tokenarr[1];
+	return when(User.findOne({name: name}))
+		.then(user => {
+			if(!user) {
+				return false;
+			}
+			return when(jwt.verify(token, user.login.code))
+				.then(decoded => {
+      				if (!decoded) {
+					return false;
+				} else {
+        				if(decoded.id == user._id) {
+						return user;
+					} else {
+						return false;
+					}
+      				}
+    			}); 
+		})
+		.otherwise(err => {
+			console.log("ERROR",err);
+		});
+};
+
+// Create a model from the schema
 User = mongoose.model('User', User);

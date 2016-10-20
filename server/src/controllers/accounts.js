@@ -63,19 +63,65 @@ Account.signUp = function(req, res) {
 
 /**
  * Signs a user in
- * @param {http.request} req - The request object
+ * @param {http.request} req - The request object, with json body: {
+				name: string,
+				password: name }
  * @param {http.response} res - The response object
+				<li> 400 if invalid credentials, with json body: {error: string} </li>
+				<li> 201 on success, with json body: {token: string} </li>
  */
 Account.signIn = function(req, res) {
-	res.status(201).json({status: 'success'});
+	//return when(User.findOne({name:req.body.name}))
+	return when(User.findOne({name:req.body.name}).exec())
+		.then(user => {
+			if(!user) {
+				return res.status(400).json({
+					error: 'Invalid user name or password'
+				});
+			}
+			if(user.matchPassword(req.body.password)) {
+				return when(user.generateLogin())
+					.then(token => {
+						return res.status(201).json({
+							token: token
+						});
+					});
+			} else {
+				return res.status(400).json({
+					error: 'Invalid user name or password'
+				});
+			}
+		});
 };
 
 /**
  * Signs a user out
- * @param {http.request} req - The request object
- * @param {http.response} res - The response object
+ * @param {http.request} req - The request object, with x-access-token headers set
+ * @param {http.response} res - The response object:
+				<li> 400 if invalid token, with json body: {error: string} </li>
+				<li> 201 on success, with json body: {} </li>
  */
 Account.signOut = function(req, res) {
-	res.status(201).json({status: 'success'});
+	if(req.headers['x-access-token']) {
+		return when(User.verifyLogin(req.headers['x-access-token']))
+				.then(user => {
+					if(!user) {
+						return res.status(400).json({error: 'invalid token'});
+					}
+					user.login = {};
+					return when(user.save())
+						.then(() => {
+							return res.status(201).json({});
+						})
+						.otherwise(err => {
+							return res.status(400).json({error: 'invalid token'});
+						});
+				})
+				.otherwise(err => {
+					return res.status(400).json({error: 'invalid token'});
+				});
+	} else {
+		return res.status(400).json({error: 'invalid token'});
+	}					
 };
 

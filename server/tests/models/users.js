@@ -4,6 +4,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
+var jwt = require('jsonwebtoken');
 require('../../src/models/users');
 
 describe("User", function() {
@@ -320,4 +321,130 @@ describe("User", function() {
 				});
 		});
 	});
+
+	/*** Match Password ***/
+	context("#matchPassword", function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			user = new User();
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should match password", () => {
+			return when(user.setPassword('passy'))
+				.then(valid => {
+					return when(user.matchPassword('passy'))
+						.then(matches => {
+							assert.equal(matches,true);
+						});
+				});
+		});
+
+		it("should not match password", () => {
+			return when(user.setPassword('passy'))
+				.then(valid => {
+					return when(user.matchPassword('notPassy'))
+						.then(matches => {
+							assert.equal(matches,false);
+						});
+				});
+		});
+	});
+
+	/*** Generate Login ***/
+//	context("#generateLogin", function() {
+//
+//		var ctx = null;
+//		var user = null;
+//		var UserMock = null;
+//
+//		beforeEach(function() {
+//			ctx = sinon.sandbox.create();
+//                        ctx.stub(User.prototype,'save',function(next) {return next();});
+//			user = new User();
+//			UserMock = ctx.mock(User);
+//		});
+//
+//		afterEach(function() {
+//			ctx.restore();
+//		});
+//
+//		it("should generate login", () => {
+//			return when(user.generateLogin())
+//				.then(token => {
+//					var tokenarr = token.split('-',2);
+//					token = tokenarr[1];
+//					assert(user.login);
+//					assert(user.login.code);
+//					assert(user.login.timestamp);
+//					return when(jwt.verify(token,user.login.code))
+//						.then(decoded => {
+//							assert.equal(user._id,decoded.id);
+//						});
+//				});
+//		});
+//
+//	});
+
+	/*** Verify Login ***/
+//	context(".verifyLogin", function() {
+//
+//		var ctx = null;
+//		var user = null;
+//		var UserMock = null;
+//
+//		beforeEach(function() {
+//			ctx = sinon.sandbox.create();
+//                        ctx.stub(User.prototype,'save',function(next) {return next();});
+//			user = new User();
+//			UserMock = ctx.mock(User);
+//		});
+//
+//		afterEach(function() {
+//			ctx.restore();
+//		});
+//
+//		it("should verify login", () => {
+//			user.name = "foo";
+//			UserMock
+//				.expects('findOne')
+//				.withArgs({name: user.name})
+//				.returns(user);
+//			return when(user.generateLogin())
+//				.then(token => {
+//					return when(User.verifyLogin(token))
+//						.then(valid => {
+//							assert(valid);
+//						});
+//				});
+//		});
+//
+//		it("should not verify login", () => {
+//			user.name = "foo";
+//			UserMock
+//				.expects('findOne')
+//				.withArgs({name: "asdfasdfasdf"})
+//				.returns(user);
+//			return when(user.generateLogin())
+//				.then(token => {
+//					token = "asdfasdfasdf";
+//					return when(User.verifyLogin(token))
+//						.then(valid => {
+//							assert(!valid);
+//						});
+//				});
+//		});
+//		
+//
+//	});
+
 });

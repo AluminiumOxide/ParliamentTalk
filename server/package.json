@@ -9,12 +9,13 @@
     "start": "node build/index.js",
     "watch": "mocha -R nyan --recursive build/tests/*",
     "pretest": "npm run build && npm-install-changed",
-    "test": "istanbul cover _mocha --recursive build/tests/*",
+    "test": "mocha --recursive build/tests/*",
     "doc": "jsdoc -d docs/ -r src/*"
   },
   "author": "Sapphyre Gervais",
   "license": "ISC",
   "dependencies": {
+    "babel": "^6.5.2",
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
