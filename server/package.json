@@ -1,7 +1,7 @@
 {
-  "name": "server",
+  "name": "parliament-talk-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "API for ParliamentTalk democracy tool",
   "main": "index.js",
   "scripts": {
     "build": "babel . --ignore build,coverage,docs,node_modules --out-dir build",
@@ -15,7 +15,7 @@
   "author": "Sapphyre Gervais",
   "license": "ISC",
   "dependencies": {
-    "babel": "^6.5.2",
+    "babel-cli": "^6.18.0",
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
@@ -27,10 +27,13 @@
   },
   "devDependencies": {
     "babel-cli": "^6.14.0",
+    "connect": "^3.2.0",
     "istanbul": "^0.4.5",
+    "js-yaml": "^3.3.0",
     "jsdoc": "^3.4.0",
     "mocha": "^3.0.2",
     "npm-install-changed": "^1.2.1",
-    "sinon": "^1.17.5"
+    "sinon": "^1.17.5",
+    "swagger-tools": "0.10.1"
   }
 }

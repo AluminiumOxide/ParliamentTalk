@@ -1,0 +1,403 @@
+---
+swagger: "2.0"
+info:
+  description: "API for ParliamentTalk democracy tool"
+  version: "1.0.0"
+  title: "ParliamentTalk"
+  license:
+    name: "GPL3"
+    url: "http://opensource.org/licenses/GPL3"
+basePath: "/api"
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /account:
+    get:
+      tags:
+      - "accounts"
+      description: "Gets a user's information"
+      operationId: "viewAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Auth"
+        in: "header"
+        description: "The session token"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "user response"
+          schema:
+            $ref: "#/definitions/user"
+        default:
+          description: "account error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    post:
+      tags:
+      - "accounts"
+      description: "Updates a user's information"
+      operationId: "updateAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Auth"
+        in: "header"
+        description: "The session token"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "user"
+        description: "Updated user account data"
+        required: true
+        schema:
+          $ref: "#/definitions/updateUser"
+      responses:
+        200:
+          description: "updated user response"
+          schema:
+            $ref: "#/definitions/user"
+        default:
+          description: "update error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    delete:
+      tags:
+      - "accounts"
+      description: "Deletes a user's account"
+      operationId: "deleteAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Auth"
+        in: "header"
+        description: "The session token"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "delete error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/recover:
+    post:
+      tags:
+      - "accounts"
+      description: "Recovers a user's account"
+      operationId: "recoverAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "email"
+        description: "The user's email"
+        required: true
+        schema:
+          $ref: "#/definitions/email"
+      responses:
+        200:
+          description: "boolean success response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "recover error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/verify:
+    post:
+      tags:
+      - "accounts"
+      description: "Verifies a user's account"
+      operationId: "verifyAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Auth"
+        in: "header"
+        description: "The session token"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "verificationCode"
+        description: "The verification code"
+        required: true
+        schema:
+          $ref: "#/definitions/verificationCode"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "verify error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/verify/email:
+    post:
+      tags:
+      - "accounts"
+      description: "Verifies if a user email would be valid"
+      operationId: "verifyEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "email"
+        description: "The proposed email"
+        required: true
+        schema:
+          $ref: "#/definitions/email"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "verify error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/verify/name:
+    post:
+      tags:
+      - "accounts"
+      description: "Verifies if a user name would be valid"
+      operationId: "verifyName"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "name"
+        description: "The proposed user name"
+        required: true
+        schema:
+          $ref: "#/definitions/username"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "verify error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/verify/password:
+    post:
+      tags:
+      - "accounts"
+      description: "Verifies if a user password would be valid"
+      operationId: "verifyPassword"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "name"
+        description: "The proposed password"
+        required: true
+        schema:
+          $ref: "#/definitions/password"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "verify error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /signIn:
+    post:
+      tags:
+      - "authentication"
+      description: "Signs a user in"
+      operationId: "signIn"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "credentials"
+        description: "The sign in credentials"
+        required: true
+        schema:
+          $ref: "#/definitions/credentials"
+      responses:
+        200:
+          description: "token response"
+          schema:
+            $ref: "#/definitions/token"
+        default:
+          description: "sign in error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Authentication"
+    x-swagger-router-controller: "accounts"
+  /signOut:
+    post:
+      tags:
+      - "authentication"
+      description: "Signs a user out"
+      operationId: "signOut"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "X-Auth"
+        in: "header"
+        description: "The session token"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "boolean response to indicate success"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "sign in error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Authentication"
+    x-swagger-router-controller: "accounts"
+  /signUp:
+    post:
+      tags:
+      - "authentication"
+      description: "Creates a new user account"
+      operationId: "signUp"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "The data for the new user account"
+        required: true
+        schema:
+          $ref: "#/definitions/newUser"
+      responses:
+        201:
+          description: "boolean response to indicate success"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "sign up error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Authentication"
+    x-swagger-router-controller: "accounts"
+definitions:
+  newUser:
+    type: "object"
+    required:
+    - "email"
+    - "name"
+    - "password"
+    properties:
+      name:
+        $ref: "#/definitions/username"
+      email:
+        $ref: "#/definitions/email"
+      password:
+        $ref: "#/definitions/password"
+  updateUser:
+    type: "object"
+    properties:
+      name:
+        $ref: "#/definitions/username"
+      email:
+        $ref: "#/definitions/email"
+      password:
+        $ref: "#/definitions/password"
+  user:
+    type: "object"
+    required:
+    - "_id"
+    - "email"
+    - "name"
+    properties:
+      _id:
+        $ref: "#/definitions/id"
+      name:
+        $ref: "#/definitions/username"
+      email:
+        $ref: "#/definitions/email"
+  credentials:
+    type: "object"
+    required:
+    - "name"
+    - "password"
+    properties:
+      name:
+        $ref: "#/definitions/username"
+      password:
+        $ref: "#/definitions/password"
+    description: "sign in credentials"
+  token:
+    type: "object"
+    required:
+    - "token"
+    properties:
+      token:
+        $ref: "#/definitions/tokenString"
+    description: "authentication token"
+  errorModel:
+    type: "object"
+    required:
+    - "code"
+    - "message"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+  id:
+    type: "integer"
+    format: "int64"
+    description: "An identifier"
+  tokenString:
+    type: "string"
+    description: "A token string"
+  yesNo:
+    type: "boolean"
+    description: "True/False response"
+  verificationCode:
+    type: "string"
+    description: "A verification code"
+  email:
+    type: "string"
+    format: "email"
+    description: "An email address"
+  username:
+    type: "string"
+    description: "A user name"
+  password:
+    type: "string"
+    format: "pasword"
+    description: "A password"
+parameters:
+  tokenParam:
+    name: "X-Auth"
+    in: "header"
+    description: "The session token"
+    required: true
+    type: "string"

@@ -1,71 +1,47 @@
-/*** Modules ***/
-var express = require('express');
-var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
-var multer = require('multer');
+'use strict';
 
+/*** Modules ***/
+var mongoose = require('mongoose');
+var app = require('connect')();
+var http = require('http');
+var swaggerTools = require('swagger-tools');
+var jsyaml = require('js-yaml');
+var fs = require('fs');
+var serverPort = 8080;
 /*** Files ***/
 require('./models/users');
 
 /*** Models ***/
 var User = mongoose.model('User');
 
-/*** Controllers ***/
-var AccountController = require('./controllers/accounts');
+// swaggerRouter configuration
+var options = {
+  swaggerUi: './api/swagger.json',
+  controllers: './src/controllers',
+  useStubs: process.env.NODE_ENV === 'development' ? true : false // Conditionally turn on stubs (mock mode)
+};
 
-/*** App Setup ***/
-var app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
-var upload = multer();
-mongoose.connect('mongodb://localhost/ptalk', function (err) {
+// The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
+var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
+var swaggerDoc = jsyaml.safeLoad(spec);
 
-if(err) {
-	res.send("ERR");
-	return
-}
+// Initialize the Swagger middleware
+swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
+  // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
+  app.use(middleware.swaggerMetadata());
 
-/*** Routes ***/
+  // Validate Swagger requests
+  app.use(middleware.swaggerValidator());
 
-// Root
-app.get('/', function(req, res) {
-	res.send('Hello World!');
-});
+  // Route validated requests to appropriate controller
+  app.use(middleware.swaggerRouter(options));
 
-// Sign In
-app.post('/signIn', upload.array(), function(req, res) {
-	AccountController.signIn(req, res);
-});
+  // Serve the Swagger documents and Swagger UI
+  app.use(middleware.swaggerUi());
 
-// Sign Out
-app.post('/signOut', upload.array(), function(req, res) {
-	AccountController.signOut(req, res);
-});
-
-// Sign Up
-app.post('/signUp', upload.array(), function(req, res) {
-	AccountController.signUp(req, res);
-});
-
-// get account data
-app.get('/account/', function(req, res) {
-	AccountController.view(req, res);
-});
-
-// recover account
-// verify account
-// update account
-
-
-// get vote data
-// get vote token
-// cast ballot
-
-// get bill data
-
-/*** Run App ***/
-app.listen(3000, function() {
-	console.log("App listening on port 3000!");
-});
-
+  // Start the server
+  http.createServer(app).listen(serverPort, function () {
+    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
+    console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+  });
 });
