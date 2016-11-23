@@ -4,7 +4,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
-require('../../src/models/users');
+require('../../../src/models/users');
 
 /*** Helper Functions ***/
 
@@ -20,26 +20,24 @@ var genReq = function(data,head) {
 // generate result
 var genRes = function() {
 	var res = {
-		resData: { status: '', json: {}}
+		resData: null,
+		statusCode: null
 	};
 	Object.bind(res);
-	res.status = function(s) {
-		var that = this;
-		return {
-			json: function(o) {
-				that.resData.status = s;
-				that.resData.json = o;
-				return;
-			}
-		}
+	res.end = function(s) {
+		this.resData = s;
 	};
 	return res;
 };
 
+// generate next
+var genNext = function() {
+	return function() { return; }
+};
 
 describe("Authentication", function() {
 	
-	var Account = require('../../src/controllers/Authentication');
+	var Account = require('../../../src/controllers/Authentication');
 	var User = mongoose.model('User');
 
 	/*** Sign Up ***/
@@ -77,10 +75,9 @@ describe("Authentication", function() {
 				.expects('setPassword')
 				.withArgs(data.password)
 				.returns(true);
-			return when(Account.signUp(req, res))
+			return when(Account.signUp(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,201);
-					assert.equal(Object.keys(res.resData.json).length,0);
+					assert.equal(res.statusCode,201);
 				});
 		});
 
@@ -104,11 +101,11 @@ describe("Authentication", function() {
 				.expects('setPassword')
 				.withArgs(data.password)
 				.returns(true);
-			return when(Account.signUp(req, res))
+			return when(Account.signUp(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
-					assert.equal(res.resData.json.field,'name');
-					assert.equal(res.resData.json.error,'Invalid user name');
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'name');
+					assert.equal(JSON.parse(res.resData).error,'Invalid user name');
 				});
 		});
 
@@ -132,11 +129,11 @@ describe("Authentication", function() {
 				.expects('setPassword')
 				.withArgs(data.password)
 				.returns(true);
-			return when(Account.signUp(req, res))
+			return when(Account.signUp(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
-					assert.equal(res.resData.json.field,'email');
-					assert.equal(res.resData.json.error,'Invalid email');
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'email');
+					assert.equal(JSON.parse(res.resData).error,'Invalid email');
 				});
 		});
 
@@ -160,11 +157,11 @@ describe("Authentication", function() {
 				.expects('setPassword')
 				.withArgs(data.password)
 				.returns(false);
-			return when(Account.signUp(req, res))
+			return when(Account.signUp(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
-					assert.equal(res.resData.json.field,'password');
-					assert.equal(res.resData.json.error,'Invalid password');
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'password');
+					assert.equal(JSON.parse(res.resData).error,'Invalid password');
 				});
 		});
 	});
@@ -207,10 +204,10 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req, res))
+			return when(Account.signIn(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,201);
-					assert.equal(res.resData.json.token,'asdfasdf');
+					assert.equal(res.statusCode,201);
+					assert.equal(JSON.parse(res.resData).token,'asdfasdf');
 				});
 		});
 
@@ -233,9 +230,9 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req, res))
+			return when(Account.signIn(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
+					assert.equal(res.statusCode,400);
 				});
 		});
 
@@ -257,9 +254,9 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req, res))
+			return when(Account.signIn(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
+					assert.equal(res.statusCode,400);
 				});
 		});
 
@@ -282,9 +279,9 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req, res))
+			return when(Account.signIn(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
+					assert.equal(res.statusCode,400);
 				});
 		});
 
@@ -306,9 +303,9 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req, res))
+			return when(Account.signIn(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.resData.status,400);
+					assert.equal(res.statusCode,400);
 				});
 		});
 
@@ -357,13 +354,13 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req1, res1))
+			return when(Account.signIn(req1, res1, genNext()))
 				.then(() => {
-					var req2 = genReq({},{'x-access-token':res1.resData.json.token});
+					var req2 = genReq({},{'x-access-token':JSON.parse(res1.resData).token});
 					var res2 = genRes();
-					return when(Account.signOut(req2,res2))
+					return when(Account.signOut(req2,res2,genNext()))
 						.then(() => {
-							assert.equal(res2.resData.status,201);
+							assert.equal(res2.statusCode,201);
 						});
 				});
 		});
@@ -393,13 +390,13 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req1, res1))
+			return when(Account.signIn(req1, res1, genNext()))
 				.then(() => {
 					var req2 = genReq({},{'x-access-token':'badtoken'});
 					var res2 = genRes();
-					return when(Account.signOut(req2,res2))
+					return when(Account.signOut(req2,res2,genNext()))
 						.then(() => {
-							assert.equal(res2.resData.status,400);
+							assert.equal(res2.statusCode,400);
 						});
 				});
 		});
@@ -429,13 +426,13 @@ describe("Authentication", function() {
 				.expects('generateLogin')
 				.returns('asdfasdf');
 
-			return when(Account.signIn(req1, res1))
+			return when(Account.signIn(req1, res1, genNext()))
 				.then(() => {
 					var req2 = genReq({},{});
 					var res2 = genRes();
-					return when(Account.signOut(req2,res2))
+					return when(Account.signOut(req2,res2,genNext()))
 						.then(() => {
-							assert.equal(res2.resData.status,400);
+							assert.equal(res2.statusCode,400);
 						});
 				});
 		});
@@ -443,9 +440,9 @@ describe("Authentication", function() {
 		it("should not sign out without a prior login", () => {
 			var req1 = genReq({},{});
 			var res1 = genRes();
-			return when(Account.signOut(req1,res1))
+			return when(Account.signOut(req1,res1,genNext()))
 				.then(() => {
-					assert.equal(res1.resData.status,400);
+					assert.equal(res1.statusCode,400);
 				});
 		});
 	});

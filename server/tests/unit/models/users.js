@@ -5,7 +5,7 @@ var sinon = require('sinon');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
 var jwt = require('jsonwebtoken');
-require('../../src/models/users');
+require('../../../src/models/users');
 
 describe("User", function() {
 

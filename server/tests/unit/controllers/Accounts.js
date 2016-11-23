@@ -4,7 +4,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
-require('../../src/models/users');
+require('../../../src/models/users');
 
 /*** Helper Functions ***/
 
@@ -20,27 +20,25 @@ var genReq = function(data,head) {
 // generate result
 var genRes = function() {
 	var res = {
-		resData: { status: '', json: {}}
+		resData: null,
+		statusCode: null
 	};
 	Object.bind(res);
-	res.status = function(s) {
-		var that = this;
-		return {
-			json: function(o) {
-				that.resData.status = s;
-				that.resData.json = o;
-				return;
-			}
-		}
+	res.end = function(s) {
+		this.resData = s;
 	};
 	return res;
 };
 
+// generate next
+var genNext = function() {
+	return function() { return; }
+};
 
 describe("Account", function() {
 	
-	var Account = require('../../src/controllers/Accounts');
-	var Authentication = require('../../src/controllers/Authentication');
+	var Account = require('../../../src/controllers/Accounts');
+	var Authentication = require('../../../src/controllers/Authentication');
 	var User = mongoose.model('User');
 
 	/*** View ***/
@@ -80,14 +78,14 @@ describe("Account", function() {
 			ctx.stub(User,'verifyLogin',function(args) { 
 				return user; 
 			});
-			return when(Authentication.signIn(req1, res1))
+			return when(Authentication.signIn(req1, res1, genNext()))
 				.then(() => {
-					var req2 = genReq({},{'x-access-token':res1.resData.json.token});
+					var req2 = genReq({},{'x-access-token':JSON.parse(res1.resData).token});
 					var res2 = genRes();
-					return when(Account.viewAccount(req2,res2))
+					return when(Account.viewAccount(req2, res2, genNext()))
 						.then(() => {
-							assert.equal(res2.resData.status,200);
-							assert.deepEqual(res2.resData.json,user);
+							assert.equal(res2.statusCode,200);
+							assert.deepEqual(res2.resData,JSON.stringify(user));
 						});
 				});
 		});
@@ -111,13 +109,13 @@ describe("Account", function() {
 			ctx.stub(User,'verifyLogin',function(args) { 
 				return false; 
 			});
-			return when(Authentication.signIn(req1, res1))
+			return when(Authentication.signIn(req1, res1, genNext()))
 				.then(() => {
 					var req2 = genReq({},{'x-access-token':'bad'});
 					var res2 = genRes();
-					return when(Account.viewAccount(req2,res2))
+					return when(Account.viewAccount(req2, res2, genNext()))
 						.then(() => {
-							assert.equal(res2.resData.status,400);
+							assert.equal(res2.statusCode,400);
 						});
 				});
 		});
@@ -135,9 +133,9 @@ describe("Account", function() {
 			});
 			var req2 = genReq({},{});
 			var res2 = genRes();
-			return when(Account.viewAccount(req2,res2))
+			return when(Account.viewAccount(req2, res2, genNext()))
 				.then(() => {
-					assert.equal(res2.resData.status,400);
+					assert.equal(res2.statusCode,400);
 				});
 		});
 

@@ -9,7 +9,7 @@
     "start": "node build/index.js",
     "watch": "mocha -R nyan --recursive build/tests/*",
     "pretest": "npm run build && npm-install-changed",
-    "test": "mocha --recursive build/tests/*",
+    "test": "mocha --recursive build/tests/unit/*",
     "doc": "jsdoc -d docs/ -r src/*"
   },
   "author": "Sapphyre Gervais",
@@ -19,10 +19,12 @@
     "bcrypt": "^0.8.7",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "hippie-swagger": "^2.0.1",
     "jsonwebtoken": "^7.1.7",
     "mongoose": "^4.5.10",
     "multer": "^1.2.0",
     "promise": "^7.1.1",
+    "swagger-parser": "^3.4.1",
     "when": "^3.7.7"
   },
   "devDependencies": {
