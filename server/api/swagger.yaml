@@ -24,7 +24,7 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "X-Auth"
+      - name: "x-access-token"
         in: "header"
         description: "The session token"
         required: true
@@ -47,7 +47,7 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "X-Auth"
+      - name: "x-access-token"
         in: "header"
         description: "The session token"
         required: true
@@ -76,7 +76,7 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "X-Auth"
+      - name: "x-access-token"
         in: "header"
         description: "The session token"
         required: true
@@ -127,7 +127,7 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "X-Auth"
+      - name: "x-access-token"
         in: "header"
         description: "The session token"
         required: true
@@ -262,7 +262,7 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - name: "X-Auth"
+      - name: "x-access-token"
         in: "header"
         description: "The session token"
         required: true
@@ -396,7 +396,7 @@ definitions:
     description: "A password"
 parameters:
   tokenParam:
-    name: "X-Auth"
+    name: "x-access-token"
     in: "header"
     description: "The session token"
     required: true

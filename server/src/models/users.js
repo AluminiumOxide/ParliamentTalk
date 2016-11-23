@@ -123,7 +123,7 @@ User.methods.setName = function(name) {
  */
 User.methods.checkName = function(name) {
 	if(name) {
-		return User.count({'name':name})
+		return when(User.count({'name':name}))
 			.then(count => {
 				if(count === 0) {
 					return true;
@@ -240,7 +240,6 @@ User.methods.generateLogin = function() {
 	this.login.timestamp = new Date();
 	return when(this.save())
 		.then(() => {
-console.log('save',this);
 			var idObj = {'id':this._id};
 			return this.name+"-"+jwt.sign(idObj, this.login.code);
 		})
@@ -256,7 +255,6 @@ console.log('save',this);
  * @returns {boolean|User} - user if valid, false otherwise
  */
 User.statics.verifyLogin = function(tokenstr) {
-console.log("verify login");
 	var tokenarr = tokenstr.split('-',2);
 	var name = tokenarr[0];
 	var token = tokenarr[1];
@@ -280,6 +278,7 @@ console.log("verify login");
 		})
 		.otherwise(err => {
 			console.log("ERROR",err);
+			return false;
 		});
 };
 

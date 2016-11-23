@@ -148,10 +148,14 @@ exports.viewAccount = function(req, res, next) {
 	return when(verifyLogin(req))
 		.then(user => {
 			delete user['password'];
-			return res.status(200).json(user);
+			res.statusCode = 200;
+			res.end(JSON.stringify(user));
+			return next();
 		})
 		.otherwise(err => {
-			return res.status(400).json({});
+			res.statusCode = 400;
+			res.end(JSON.stringify({}));
+			return next();
 		});
 }
 

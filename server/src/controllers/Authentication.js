@@ -18,21 +18,27 @@ exports.signIn = function(req, res, next) {
         return when(User.findOne({name:req.body.name}).exec())
                 .then(user => {
                         if(!user) {
-                                return res.status(400).json({
+                                res.statusCode = 400;
+				res.end(JSON.stringify({
                                         error: 'Invalid user name or password'
-                                });
+                                }));
+				return next();
                         }
                         if(user.matchPassword(req.body.password)) {
                                 return when(user.generateLogin())
                                         .then(token => {
-                                                return res.status(201).json({
+                                                res.statusCode = 201;
+						res.end(JSON.stringify({
                                                         token: token
-                                                });
+                                                }));
+						return next();
                                         });
                         } else {
-                                return res.status(400).json({
+                                res.statusCode = 400;
+				res.end(JSON.stringify({
                                         error: 'Invalid user name or password'
-                                });
+                                }));
+				return next();
                         }
                 });
 };
@@ -51,14 +57,20 @@ exports.signOut = function(req, res, next) {
                         user.login = {};
                         return when(user.save())
                                 .then(() => {
-                                        return res.status(201).json({});
+                                        res.statusCode = 201;
+					res.end();
+					return next();
                                 })
                                 .otherwise(err => {
-                                        return res.status(400).json({error: 'invalid token'});
+                                        res.statusCode = 400;
+					res.end(JSON.stringify({error: 'invalid token'}));
+					return next();
                                 });
                 })
                 .otherwise(err => {
-                        return res.status(400).json({error: 'invalid token'});
+                	res.statusCode = 400;
+			res.end(JSON.stringify({error: 'invalid token'}));
+			return next();
                 });
 };
 
@@ -81,39 +93,63 @@ exports.signUp = function(req, res, next) {
         return when(account.setName(req.body.name))
                 .then(success => {
                         if(!success) {
-                                return res.status(400).json({
+				res.statusCode = 400;
+                                res.end(JSON.stringify({
                                         error: 'Invalid user name',
                                         field: 'name'
-                                });
+                                }));
+				return next();
                         }
 
                         // check and set the email
                         return when(account.setEmail(req.body.email))
                                 .then(success => {
                                         if(!success) {
-                                                return res.status(400).json({
+						res.statusCode = 400;
+                                                res.end(JSON.stringify({
                                                         error: 'Invalid email',
                                                         field: 'email'
-                                                });
+                                                }));
+						return next();
                                         }
 
                                         // check and set the password
                                         return when(account.setPassword(req.body.password))
                                                 .then(success => {
                                                         if(!success) {
-                                                                return res.status(400).json({
+								res.statusCode = 400;
+                                                                res.end(JSON.stringify({
                                                                         error: 'Invalid password',
                                                                         field: 'password'
-                                                                });
+                                                                }));
+								return next();
                                                         }
 
                                                         // save the new user
                                                         return when(account.save())
                                                                 .then(() => {
-                                                                        return res.status(201).json({});
+									res.statusCode = 201;
+									res.end();
+									return next();
+								}).otherwise(err => {
+									res.statusCode = 500;
+									res.end();
+									return next();
                                                                 });
+						}).otherwise(err => {
+							res.statusCode = 500;
+							res.end();
+							return next();
                                                 });
+				}).otherwise(err => {
+					res.statusCode = 500;
+					res.end();
+					return next();
                                 });
+		}).otherwise(err => {
+			res.statusCode = 500;
+			res.end();
+			return next();
                 });
 }
 
