@@ -362,90 +362,153 @@ describe("User", function() {
 	});
 
 	/*** Generate Login ***/
-//	context("#generateLogin", function() {
-//
-//		var ctx = null;
-//		var user = null;
-//		var UserMock = null;
-//
-//		beforeEach(function() {
-//			ctx = sinon.sandbox.create();
-//                        ctx.stub(User.prototype,'save',function(next) {return next();});
-//			user = new User();
-//			UserMock = ctx.mock(User);
-//		});
-//
-//		afterEach(function() {
-//			ctx.restore();
-//		});
-//
-//		it("should generate login", () => {
-//			return when(user.generateLogin())
-//				.then(token => {
-//					var tokenarr = token.split('-',2);
-//					token = tokenarr[1];
-//					assert(user.login);
-//					assert(user.login.code);
-//					assert(user.login.timestamp);
-//					return when(jwt.verify(token,user.login.code))
-//						.then(decoded => {
-//							assert.equal(user._id,decoded.id);
-//						});
-//				});
-//		});
-//
-//	});
+	context("#generateLogin", function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			user._id = mongoose.Types.ObjectId();
+			user.name = 'testing';
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should generate login", () => {
+			return when(user.generateLogin())
+				.then(token => {
+					var tokenarr = token.split('-');
+					var tokenstr = tokenarr.slice(1).join('-');
+					assert(user.login);
+					assert(user.login.code);
+					assert(user.login.timestamp);
+					return when(jwt.verify(tokenstr,user.login.code))
+						.then(decoded => {
+							assert.equal(user._id,decoded.id);
+						});
+				});
+		});
+	});
 
 	/*** Verify Login ***/
-//	context(".verifyLogin", function() {
-//
-//		var ctx = null;
-//		var user = null;
-//		var UserMock = null;
-//
-//		beforeEach(function() {
-//			ctx = sinon.sandbox.create();
-//                        ctx.stub(User.prototype,'save',function(next) {return next();});
-//			user = new User();
-//			UserMock = ctx.mock(User);
-//		});
-//
-//		afterEach(function() {
-//			ctx.restore();
-//		});
-//
-//		it("should verify login", () => {
-//			user.name = "foo";
-//			UserMock
-//				.expects('findOne')
-//				.withArgs({name: user.name})
-//				.returns(user);
-//			return when(user.generateLogin())
-//				.then(token => {
-//					return when(User.verifyLogin(token))
-//						.then(valid => {
-//							assert(valid);
-//						});
-//				});
-//		});
-//
-//		it("should not verify login", () => {
-//			user.name = "foo";
-//			UserMock
-//				.expects('findOne')
-//				.withArgs({name: "asdfasdfasdf"})
-//				.returns(user);
-//			return when(user.generateLogin())
-//				.then(token => {
-//					token = "asdfasdfasdf";
-//					return when(User.verifyLogin(token))
-//						.then(valid => {
-//							assert(!valid);
-//						});
-//				});
-//		});
-//		
-//
-//	});
+	context(".verifyLogin", function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should verify login", () => {
+			user.name = "foo";
+			UserMock
+				.expects('findOne')
+				.withArgs({name: user.name})
+				.returns({exec: function(){ return user}});
+			return when(user.generateLogin())
+				.then(token => {
+					return when(User.verifyLogin(token))
+						.then(valid => {
+							assert(valid);
+						});
+				});
+		});
+
+		it("should not verify login with bad token", () => {
+			user.name = "foo";
+			UserMock
+				.expects('findOne')
+				.withArgs({name: "foo"})
+				.returns({exec: function() {return user}});
+			return when(user.generateLogin())
+				.then(token => {
+					token = "foo-asdfasdfasdf";
+					return when(User.verifyLogin(token))
+						.then(valid => {
+							assert(!valid);
+						});
+				});
+		});
+
+		it("should not verify login with no user", () => {
+			user.name = "foo";
+			UserMock
+				.expects('findOne')
+				.withArgs({name: "foo"})
+				.returns({exec: function() {return null}});
+			return when(user.generateLogin())
+				.then(token => {
+					return when(User.verifyLogin(token))
+						.then(valid => {
+							assert(!valid);
+						});
+				});
+		});
+
+		it("should not verify login with no token string", () => {
+			user.name = "foo";
+			UserMock
+				.expects('findOne')
+				.withArgs({name: "foo"})
+				.returns({exec: function() {return user;}});
+			return when(user.generateLogin())
+				.then(token => {
+					token = token.split('-')[0]+'-';
+					return when(User.verifyLogin(token))
+						.then(valid => {
+							assert(!valid);
+						});
+				});
+		});
+
+		it("should not verify login with bad ID", () => {
+			user.name = "foo";
+			UserMock
+				.expects('findOne')
+				.withArgs({name: "foo"})
+				.returns({exec: function() {return user;}});
+			return when(user.generateLogin())
+				.then(token => {
+					token = 'foo-'+jwt.sign({'id':'bad'},user.login.code);
+					return when(User.verifyLogin(token))
+						.then(valid => {
+							assert(!valid);
+						});
+				});
+		});
+
+		it("should not verify login with empty token", () => {
+			user.name = "foo";
+			UserMock
+				.expects('findOne')
+				.withArgs({name: "foo"})
+				.returns({exec: function() {return user;}});
+			return when(user.generateLogin())
+				.then(token => {
+					token = 'foo-'+jwt.sign({},user.login.code);
+					return when(User.verifyLogin(token))
+						.then(valid => {
+							assert(!valid);
+						});
+				});
+		});
+
+	});
 
 });

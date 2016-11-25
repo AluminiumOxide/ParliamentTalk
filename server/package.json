@@ -9,7 +9,9 @@
     "start": "node build/index.js",
     "watch": "mocha -R nyan --recursive build/tests/*",
     "pretest": "npm run build && npm-install-changed",
-    "test": "istanbul cover node_modules/.bin/_mocha --recursive tests/unit/*",
+    "test-unit": "istanbul cover node_modules/.bin/_mocha --recursive tests/unit/*",
+    "test-int": "node_modules/.bin/_mocha tests/integration/index.js",
+    "test": "npm run test-unit && npm run test-int",
     "doc": "jsdoc -d docs/ -r src/*"
   },
   "author": "Sapphyre Gervais",

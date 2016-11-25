@@ -206,7 +206,7 @@ describe("Authentication", function() {
 
 			return when(Account.signIn(req, res, genNext()))
 				.then(() => {
-					assert.equal(res.statusCode,201);
+					assert.equal(res.statusCode,200);
 					assert.equal(JSON.parse(res.resData).token,'asdfasdf');
 				});
 		});
@@ -360,7 +360,7 @@ describe("Authentication", function() {
 					var res2 = genRes();
 					return when(Account.signOut(req2,res2,genNext()))
 						.then(() => {
-							assert.equal(res2.statusCode,201);
+							assert.equal(res2.statusCode,200);
 						});
 				});
 		});

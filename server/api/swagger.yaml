@@ -371,8 +371,7 @@ definitions:
       message:
         type: "string"
   id:
-    type: "integer"
-    format: "int64"
+    type: "string"
     description: "An identifier"
   tokenString:
     type: "string"
@@ -392,7 +391,7 @@ definitions:
     description: "A user name"
   password:
     type: "string"
-    format: "pasword"
+    format: "password"
     description: "A password"
 parameters:
   tokenParam:

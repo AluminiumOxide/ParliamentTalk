@@ -5,135 +5,135 @@ var when = require('when');
 var User = mongoose.model('User');
 
 exports.deleteAccount = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * xAuth (String)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = { };
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * xAuth (String)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = { };
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 exports.recoverAccount = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * email (Email)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = { };
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * email (Email)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = { };
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 exports.updateAccount = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * xAuth (String)
-  * user (UpdateUser)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = {
-  "name" : { },
-  "_id" : { },
-  "email" : { }
-};
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * xAuth (String)
+//  * user (UpdateUser)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = {
+//  "name" : { },
+//  "_id" : { },
+//  "email" : { }
+//};
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 exports.verifyAccount = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * xAuth (String)
-  * verificationCode (VerificationCode)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = { };
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * xAuth (String)
+//  * verificationCode (VerificationCode)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = { };
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 exports.verifyEmail = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * email (Email)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = { };
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * email (Email)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = { };
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 exports.verifyName = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * name (Username)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = { };
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * name (Username)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = { };
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 exports.verifyPassword = function(req, res, next) {
-  /**
-   * parameters expected in the args:
-  * name (Password)
-  **/
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-    var examples = {};
-  examples['application/json'] = { };
-  if(Object.keys(examples).length > 0) {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-  }
-  else {
-    res.end();
-  }
-  
+//  /**
+//   * parameters expected in the args:
+//  * name (Password)
+//  **/
+//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+//    var examples = {};
+//  examples['application/json'] = { };
+//  if(Object.keys(examples).length > 0) {
+//    res.setHeader('Content-Type', 'application/json');
+//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
+//  }
+//  else {
+//    res.end();
+//  }
+//  
 }
 
 /**

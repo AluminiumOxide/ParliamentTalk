@@ -27,7 +27,7 @@ exports.signIn = function(req, res, next) {
                         if(user.matchPassword(req.body.password)) {
                                 return when(user.generateLogin())
                                         .then(token => {
-                                                res.statusCode = 201;
+                                                res.statusCode = 200;
 						res.end(JSON.stringify({
                                                         token: token
                                                 }));
@@ -57,7 +57,7 @@ exports.signOut = function(req, res, next) {
                         user.login = {};
                         return when(user.save())
                                 .then(() => {
-                                        res.statusCode = 201;
+                                        res.statusCode = 200;
 					res.end();
 					return next();
                                 })
@@ -88,7 +88,6 @@ exports.signUp = function(req, res, next) {
 
 	var args = (req && req.swagger && req.swagger.params) ? req.swagger.params : "";
         var account = new User();
-
         // check and set the name
         return when(account.setName(req.body.name))
                 .then(success => {

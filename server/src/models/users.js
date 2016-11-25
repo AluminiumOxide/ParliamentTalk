@@ -241,10 +241,11 @@ User.methods.generateLogin = function() {
 	return when(this.save())
 		.then(() => {
 			var idObj = {'id':this._id};
-			return this.name+"-"+jwt.sign(idObj, this.login.code);
+			return this.name+"-"+ jwt.sign(idObj, this.login.code);
 		})
 		.otherwise(err => {
 			console.log("ERROR",err);
+			throw err;
 		});
 };
 
@@ -255,9 +256,9 @@ User.methods.generateLogin = function() {
  * @returns {boolean|User} - user if valid, false otherwise
  */
 User.statics.verifyLogin = function(tokenstr) {
-	var tokenarr = tokenstr.split('-',2);
+	var tokenarr = tokenstr.split('-');
 	var name = tokenarr[0];
-	var token = tokenarr[1];
+	var token = tokenarr.slice(1).join('-');
 	return when(User.findOne({name: name}).exec())
 		.then(user => {
 			if(!user) {
@@ -265,7 +266,7 @@ User.statics.verifyLogin = function(tokenstr) {
 			}
 			return when(jwt.verify(token, user.login.code))
 				.then(decoded => {
-      				if (!decoded) {
+      				if (!decoded || !decoded.id) {
 					return false;
 				} else {
         				if(decoded.id == user._id) {
