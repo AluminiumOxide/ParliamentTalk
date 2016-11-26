@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var when = require('when');
 var User = mongoose.model('User');
 
-exports.deleteAccount = function(req, res, next) {
+//exports.deleteAccount = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * xAuth (String)
@@ -20,9 +20,9 @@ exports.deleteAccount = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
-exports.recoverAccount = function(req, res, next) {
+//exports.recoverAccount = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * email (Email)
@@ -38,9 +38,9 @@ exports.recoverAccount = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
-exports.updateAccount = function(req, res, next) {
+//exports.updateAccount = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * xAuth (String)
@@ -61,9 +61,9 @@ exports.updateAccount = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
-exports.verifyAccount = function(req, res, next) {
+//exports.verifyAccount = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * xAuth (String)
@@ -80,9 +80,9 @@ exports.verifyAccount = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
-exports.verifyEmail = function(req, res, next) {
+//exports.verifyEmail = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * email (Email)
@@ -98,9 +98,9 @@ exports.verifyEmail = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
-exports.verifyName = function(req, res, next) {
+//exports.verifyName = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * name (Username)
@@ -116,9 +116,9 @@ exports.verifyName = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
-exports.verifyPassword = function(req, res, next) {
+//exports.verifyPassword = function(req, res, next) {
 //  /**
 //   * parameters expected in the args:
 //  * name (Password)
@@ -134,7 +134,7 @@ exports.verifyPassword = function(req, res, next) {
 //    res.end();
 //  }
 //  
-}
+//}
 
 /**
  * View user data

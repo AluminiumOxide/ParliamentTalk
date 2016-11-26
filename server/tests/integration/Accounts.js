@@ -1,9 +1,31 @@
 var assert = require('assert');
 var hippie = require('hippie-swagger');
+var when = require('when');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
 
 module.exports = function(app, swagger) {
 
 	describe('Account', function() {
+
+		var user = new User();
+
+		before(function() {
+			return when(user.setName("testy"))
+				.then(success => {
+					return when(user.setEmail("testy@test.com"))
+						.then(success => {
+							return when(user.setPassword("abc123"))
+								.then(success => {
+									return when(user.save());
+								});
+						});
+				});
+		});
+
+		after(function() {
+			User.find({}).remove().exec();
+		});
 
 		describe('View Account', function() {
 			it('should view account after sign in', function(done) {

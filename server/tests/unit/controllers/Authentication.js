@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 var when = require('when');
 var assert = require('assert');
 var sinon = require('sinon');

@@ -244,7 +244,6 @@ User.methods.generateLogin = function() {
 			return this.name+"-"+ jwt.sign(idObj, this.login.code);
 		})
 		.otherwise(err => {
-			console.log("ERROR",err);
 			throw err;
 		});
 };
@@ -278,7 +277,6 @@ User.statics.verifyLogin = function(tokenstr) {
     			}); 
 		})
 		.otherwise(err => {
-			console.log("ERROR",err);
 			return false;
 		});
 };

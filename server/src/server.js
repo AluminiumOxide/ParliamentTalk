@@ -31,6 +31,7 @@ module.exports = function() {
 
 	var deferred = when.defer();
 
+	mongoose.Promise = global.Promise;
 	when(mongoose.connect('mongodb://localhost/ptalk'))
 		.then(r => {
 

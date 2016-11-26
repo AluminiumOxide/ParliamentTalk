@@ -391,7 +391,6 @@ definitions:
     description: "A user name"
   password:
     type: "string"
-    format: "password"
     description: "A password"
 parameters:
   tokenParam:
