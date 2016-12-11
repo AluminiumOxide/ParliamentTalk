@@ -32,7 +32,7 @@ module.exports = function() {
 	var deferred = when.defer();
 
 	mongoose.Promise = global.Promise;
-	when(mongoose.connect('mongodb://localhost/ptalk'))
+	when(mongoose.connect('mongodb://mongo:27017/ptalk'))
 		.then(r => {
 
 		    	// Initialize the Swagger middleware
