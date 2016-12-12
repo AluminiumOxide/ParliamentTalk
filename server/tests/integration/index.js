@@ -17,7 +17,7 @@ describe('API integration tests', function() {
 		parser.dereference('api/swagger.yaml', function(err, api) {
 			if (err) deferred.reject(err);
 			swagger = api;
-			when(appFile())
+			when(appFile('test'))
 			.then(r => {
 				app = r;
 				deferred.resolve();

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function() {
+module.exports = function(env) {
 
 	/*** Modules ***/
 	var mongoose = require('mongoose');
@@ -18,11 +18,15 @@ module.exports = function() {
 	/*** Models ***/
 	var User = mongoose.model('User');
 	
+	/*** Determine Our Environment ***/
+	var appEnv = (!!env && env == 'test') ? 'test' : 'development';
+	// TODO: When we have a production environment, test for that here
+
 	// swaggerRouter configuration
 	var options = {
 		swaggerUi: './api/swagger.json',
 	  	controllers: './src/controllers',
-	  	useStubs: process.env.NODE_ENV === 'development' ? true : false // Conditionally turn on stubs (mock mode)
+	  	useStubs: appEnv === 'development' ? true : false // Conditionally turn on stubs (mock mode)
 	};
 	
 	// The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
@@ -31,8 +35,14 @@ module.exports = function() {
 
 	var deferred = when.defer();
 
+	// Connect to the testing database if we're in tests
+	var connectionString = 'mongodb://db:27017/ptalk'; 
+	if(appEnv === 'test') {
+		connectionString = 'mongodb://db:27017/ptalktest';
+	}
+	
 	mongoose.Promise = global.Promise;
-	when(mongoose.connect('mongodb://db:27017/ptalk'))
+	when(mongoose.connect(connectionString))
 		.then(r => {
 
 		    	// Initialize the Swagger middleware
