@@ -391,7 +391,7 @@ describe("User", function() {
 					assert(user.login.timestamp);
 					return when(jwt.verify(tokenstr,user.login.code))
 						.then(decoded => {
-							assert.equal(user._id,decoded.id);
+							assert.equal(moment(user.login.timestamp).format(),moment(decoded.timestamp).format());
 						});
 				});
 		});
@@ -416,10 +416,9 @@ describe("User", function() {
 		});
 
 		it("should verify login", () => {
-			user.name = "foo";
 			UserMock
 				.expects('findOne')
-				.withArgs({name: user.name})
+				.withArgs({_id: String(user._id)})
 				.returns({exec: function(){ return user}});
 			return when(user.generateLogin())
 				.then(token => {
@@ -431,14 +430,13 @@ describe("User", function() {
 		});
 
 		it("should not verify login with bad token", () => {
-			user.name = "foo";
 			UserMock
 				.expects('findOne')
-				.withArgs({name: "foo"})
+				.withArgs({_id: String(user._id)})
 				.returns({exec: function() {return user}});
 			return when(user.generateLogin())
 				.then(token => {
-					token = "foo-asdfasdfasdf";
+					token = user._id+"-asdfasdfasdf";
 					return when(User.verifyLogin(token))
 						.then(valid => {
 							assert(!valid);
@@ -447,10 +445,9 @@ describe("User", function() {
 		});
 
 		it("should not verify login with no user", () => {
-			user.name = "foo";
 			UserMock
 				.expects('findOne')
-				.withArgs({name: "foo"})
+				.withArgs({_id: String(user._id)})
 				.returns({exec: function() {return null}});
 			return when(user.generateLogin())
 				.then(token => {
@@ -462,10 +459,9 @@ describe("User", function() {
 		});
 
 		it("should not verify login with no token string", () => {
-			user.name = "foo";
 			UserMock
 				.expects('findOne')
-				.withArgs({name: "foo"})
+				.withArgs({_id: String(user._id)})
 				.returns({exec: function() {return user;}});
 			return when(user.generateLogin())
 				.then(token => {
@@ -478,14 +474,13 @@ describe("User", function() {
 		});
 
 		it("should not verify login with bad ID", () => {
-			user.name = "foo";
 			UserMock
 				.expects('findOne')
-				.withArgs({name: "foo"})
+				.withArgs({_id: String(user._id)})
 				.returns({exec: function() {return user;}});
 			return when(user.generateLogin())
 				.then(token => {
-					token = 'foo-'+jwt.sign({'id':'bad'},user.login.code);
+					token = user._id+'-'+jwt.sign({'id':'bad'},user.login.code);
 					return when(User.verifyLogin(token))
 						.then(valid => {
 							assert(!valid);
@@ -494,14 +489,13 @@ describe("User", function() {
 		});
 
 		it("should not verify login with empty token", () => {
-			user.name = "foo";
 			UserMock
 				.expects('findOne')
-				.withArgs({name: "foo"})
+				.withArgs({_id: String(user._id)})
 				.returns({exec: function() {return user;}});
 			return when(user.generateLogin())
 				.then(token => {
-					token = 'foo-'+jwt.sign({},user.login.code);
+					token = user._id+'-'+jwt.sign({},user.login.code);
 					return when(User.verifyLogin(token))
 						.then(valid => {
 							assert(!valid);

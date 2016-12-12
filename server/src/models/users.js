@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var jwt = require('jsonwebtoken');
 var when = require('when');
 var bcrypt = require('bcrypt');
+var moment = require('moment');
 
 /**
  * @class
@@ -240,8 +241,8 @@ User.methods.generateLogin = function() {
 	this.login.timestamp = new Date();
 	return when(this.save())
 		.then(() => {
-			var idObj = {'id':this._id};
-			return this.name+"-"+ jwt.sign(idObj, this.login.code);
+			var idObj = {'timestamp':this.login.timestamp};
+			return this._id+"-"+ jwt.sign(idObj, this.login.code);
 		})
 		.otherwise(err => {
 			throw err;
@@ -256,23 +257,23 @@ User.methods.generateLogin = function() {
  */
 User.statics.verifyLogin = function(tokenstr) {
 	var tokenarr = tokenstr.split('-');
-	var name = tokenarr[0];
+	var id = tokenarr[0];
 	var token = tokenarr.slice(1).join('-');
-	return when(User.findOne({name: name}).exec())
+	return when(User.findOne({_id: id}).exec())
 		.then(user => {
 			if(!user) {
 				return false;
 			}
 			return when(jwt.verify(token, user.login.code))
 				.then(decoded => {
-      				if (!decoded || !decoded.id) {
-					return false;
-				} else {
-        				if(decoded.id == user._id) {
-						return user;
-					} else {
+      				if (!decoded || !decoded.timestamp) {
 						return false;
-					}
+					} else {
+        				if(moment(decoded.timestamp).format() === moment(user.login.timestamp).format()) {
+							return user;
+						} else {
+							return false;
+						}
       				}
     			}); 
 		})
