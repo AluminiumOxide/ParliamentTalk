@@ -139,8 +139,362 @@ describe("Account", function() {
 				});
 		});
 
+	});
 
+	/*** Update ***/
+	context(".update", function() {
 
+		var ctx = '';
+		var user = '';
+		var UserMock = null;
+		var UserFindOneStub = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			UserMock = ctx.mock(User.prototype);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should update all data", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'name':'testy1',
+						'email':'testy1@test.com',
+						'password':'passy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setName')
+						.withArgs(data2.name)
+						.returns(true);
+					userMock.expects('setEmail')
+						.withArgs(data2.email)
+						.returns(true);
+					userMock.expects('setPassword')
+						.withArgs(data2.password)
+					 	.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should update only name", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'name':'testy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setName')
+						.withArgs(data2.name)
+						.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should update only email", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'email':'testy1@test.com'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setEmail')
+						.withArgs(data2.email)
+						.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should update only password", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'password':'passy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setPassword')
+						.withArgs(data2.password)
+					 	.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should update only name and email", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'name':'testy1',
+						'email':'testy1@test.com'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setName')
+						.withArgs(data2.name)
+						.returns(true);
+					userMock.expects('setEmail')
+						.withArgs(data2.email)
+						.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should update only name and password", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'name':'testy1',
+						'password':'passy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setName')
+						.withArgs(data2.name)
+						.returns(true);
+					userMock.expects('setPassword')
+						.withArgs(data2.password)
+					 	.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should update only email and password", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'email':'testy1@test.com',
+						'password':'passy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setEmail')
+						.withArgs(data2.email)
+						.returns(true);
+					userMock.expects('setPassword')
+						.withArgs(data2.password)
+					 	.returns(true);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+		it("should not update with bad token", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					ctx.restore();
+					ctx.stub(User,'verifyLogin',function(args) { 
+						return null; 
+					});
+					var data2 = {
+						'name':'testy1',
+						'email':'testy1@test.com',
+						'password':'passy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':'badtoken'});
+					var res2 = genRes();
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,400);
+						});
+				});
+		});
+		it("should not update with empty token", () => {
+ 			var data2 = {
+ 				'name':'testy1',
+ 				'email':'testy1@test.com',
+ 				'password':'passy1'
+ 			};
+ 			var req2 = genReq(data2,{'x-access-token':''});
+ 			var res2 = genRes();
+ 			return when(Account.updateAccount(req2, res2, genNext()))
+ 				.then(() => {
+ 					assert.equal(res2.statusCode,400);
+ 				});
+ 		});
+		it("should not update without login", () => {
+ 			var data2 = {
+ 				'name':'testy1',
+ 				'email':'testy1@test.com',
+ 				'password':'passy1'
+ 			};
+ 			var req2 = genReq(data2);
+ 			var res2 = genRes();
+ 			return when(Account.updateAccount(req2, res2, genNext()))
+ 				.then(() => {
+ 					assert.equal(res2.statusCode,400);
+ 				});
+ 		});
 	});
 
 });

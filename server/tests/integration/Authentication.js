@@ -1,6 +1,6 @@
 var assert = require('assert');
 var hippie = require('hippie-swagger');
-
+var when = require('when');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 
@@ -9,11 +9,11 @@ module.exports = function(app, swagger) {
 	describe('Authentication', function() {
 	
 		before(function() {
-            User.find({}).remove().exec();
+            return when(User.find({}).remove().exec());
 		});
 
 		after(function() {
-            User.find({}).remove().exec();
+            return when(User.find({}).remove().exec());
 		});
 
 		describe('Sign Up', function() {

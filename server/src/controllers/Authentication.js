@@ -153,7 +153,7 @@ exports.signUp = function(req, res, next) {
 }
 
 var verifyLogin = function(req) {
-        if(req.headers['x-access-token']) {
+        if(req.headers && 'x-access-token' in req.headers) {
                 return when(User.verifyLogin(req.headers['x-access-token']))
                                 .then(user => {
                                         if(!user) {
