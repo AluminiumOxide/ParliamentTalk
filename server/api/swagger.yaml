@@ -281,9 +281,9 @@ paths:
   /signUp:
     post:
       tags:
-      - "authentication"
+      - "accounts"
       description: "Creates a new user account"
-      operationId: "signUp"
+      operationId: "createAccount"
       produces:
       - "application/json"
       parameters:
@@ -302,7 +302,7 @@ paths:
           description: "sign up error"
           schema:
             $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Authentication"
+      x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
 definitions:
   newUser:

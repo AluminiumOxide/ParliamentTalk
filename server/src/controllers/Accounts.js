@@ -137,6 +137,83 @@ exports.viewAccount = function(req, res, next) {
 			return next();
 		});
 }
+/**
+ * Signs up a new user
+ * @param {http.request} req - The request object, with json body: { 
+                                name: string, 
+                                email: string, 
+                                password: string }
+ * @param {http.response} res - The response object:
+                                <li> 400 if invalid data, with json body: {error: string, field: string} </li>
+                                <li> 201 on success, with json body: {} </li>
+ */
+exports.createAccount = function(req, res, next) {
+
+	var args = (req && req.swagger && req.swagger.params) ? req.swagger.params : "";
+        var account = new User();
+        // check and set the name
+        return when(account.setName(req.body.name))
+                .then(success => {
+                        if(!success) {
+				res.statusCode = 400;
+                                res.end(JSON.stringify({
+                                        error: 'Invalid user name',
+                                        field: 'name'
+                                }));
+				return next();
+                        }
+
+                        // check and set the email
+                        return when(account.setEmail(req.body.email))
+                                .then(success => {
+                                        if(!success) {
+						res.statusCode = 400;
+                                                res.end(JSON.stringify({
+                                                        error: 'Invalid email',
+                                                        field: 'email'
+                                                }));
+						return next();
+                                        }
+
+                                        // check and set the password
+                                        return when(account.setPassword(req.body.password))
+                                                .then(success => {
+                                                        if(!success) {
+								res.statusCode = 400;
+                                                                res.end(JSON.stringify({
+                                                                        error: 'Invalid password',
+                                                                        field: 'password'
+                                                                }));
+								return next();
+                                                        }
+
+                                                        // save the new user
+                                                        return when(account.save())
+                                                                .then(() => {
+									res.statusCode = 201;
+									res.end();
+									return next();
+								}).otherwise(err => {
+									res.statusCode = 500;
+									res.end();
+									return next();
+                                                                });
+						}).otherwise(err => {
+							res.statusCode = 500;
+							res.end();
+							return next();
+                                                });
+				}).otherwise(err => {
+					res.statusCode = 500;
+					res.end();
+					return next();
+                                });
+		}).otherwise(err => {
+			res.statusCode = 500;
+			res.end();
+			return next();
+                });
+}
 
 /**
  * Update user data

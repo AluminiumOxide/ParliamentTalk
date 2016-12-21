@@ -9,121 +9,21 @@ module.exports = function(app, swagger) {
 	describe('Authentication', function() {
 	
 		before(function() {
-            return when(User.find({}).remove().exec());
+			var user = new User();
+			return when(user.setName("testy"))
+				.then(success => {
+					return when(user.setEmail("testy@test.com"))
+						.then(success => {
+							return when(user.setPassword("abc123"))
+								.then(success => {
+									return when(user.save());
+								});
+						});
+				});
 		});
 
 		after(function() {
             return when(User.find({}).remove().exec());
-		});
-
-		describe('Sign Up', function() {
-			it('should sign up', function(done) {
-				hippie(app, swagger)
-					.post('/api/signUp')
-					.send({
-						"email":"testy@test.com",
-						"name":"testy",
-						"password":"abc123"
-					})
-					.expectStatus(201)
-					.end(function(err, res, body) {
-						if (err) {
-		 					assert(false);
-						} else {
-							assert(true);
-						}
-						done();
-					});
-			});
-			it('should not sign up without email', function(done) {
-				try {
-					hippie(app, swagger)
-						.post('/api/signUp')
-						.send({
-							"name":"testy",
-							"password":"abc123"
-						})
-						.expectStatus(400)
-						.end(function(err, res, body) {
-							done();
-						});
-				} catch(err) {
-					assert(true);
-					return done();
-				};
-				assert(false);
-				return done();
-			});
-			it('should not sign up without name', function(done) {
-				try {
-					hippie(app, swagger)
-						.post('/api/signUp')
-						.send({
-							"email":"testy@test.com",
-							"password":"abc123"
-						})
-						.end(function(err, res, body) {
-							done();
-						});
-				} catch(err) {
-					assert(true);
-					return done();
-				};
-				assert(false);
-				return done();
-			});
-			it('should not sign up without password', function(done) {
-				try {
-					hippie(app, swagger)
-						.post('/api/signUp')
-						.send({
-							"email":"testy@test.com",
-							"name":"testy",
-						})
-						.end(function(err, res, body) {
-							done();
-						});
-				} catch(err) {
-					assert(true);
-					return done();
-				};
-				assert(false);
-				return done();
-			});
-			it('should not sign up with duplicate email', function(done) {
-				hippie(app, swagger)
-					.post('/api/signUp')
-					.send({
-						"email":"testy@test.com",
-						"name":"testy123",
-						"password":"abc123"
-					})
-					.end(function(err, res, body) {
-						if (err) {
-							assert(true);
-						} else {
-							assert(false);
-						}
-						done();
-					});
-			});
-			it('should not sign up with duplicate user name', function(done) {
-				hippie(app, swagger)
-					.post('/api/signUp')
-					.send({
-						"email":"testy123@test.com",
-						"name":"testy",
-						"password":"abc123"
-					})
-					.end(function(err, res, body) {
-						if (err) {
-							assert(true);
-						} else {
-							assert(false);
-						}
-      						done();
-					});
-			});
 		});
 
 		describe('Sign In', function() {

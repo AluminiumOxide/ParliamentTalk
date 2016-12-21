@@ -141,6 +141,133 @@ describe("Account", function() {
 
 	});
 
+	/*** Create ***/
+	context(".create", function() {
+
+		var ctx = '';
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			UserMock = ctx.mock(User.prototype);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should create account", () => {
+			var data = { 
+				'name':'testy',
+				'email':'test@testy.com',
+				'password':'passy'
+			};
+			var req = genReq(data);
+			var res = genRes();
+			UserMock
+				.expects('setName')
+				.withArgs(data.name)
+				.returns(true);
+			UserMock
+				.expects('setEmail')
+				.withArgs(data.email)
+				.returns(true);
+			UserMock
+				.expects('setPassword')
+				.withArgs(data.password)
+				.returns(true);
+			return when(Account.createAccount(req, res, genNext()))
+				.then(() => {
+					assert.equal(res.statusCode,201);
+				});
+		});
+
+		it("should not create account without name", () => {
+			var data = { 
+				'name':'',
+				'email':'test@testy.com',
+				'password':'passy'
+			};
+			var req = genReq(data);
+			var res = genRes();
+			UserMock
+				.expects('setName')
+				.withArgs(data.name)
+				.returns(false);
+			UserMock
+				.expects('setEmail')
+				.withArgs(data.email)
+				.returns(true);
+			UserMock
+				.expects('setPassword')
+				.withArgs(data.password)
+				.returns(true);
+			return when(Account.createAccount(req, res, genNext()))
+				.then(() => {
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'name');
+					assert.equal(JSON.parse(res.resData).error,'Invalid user name');
+				});
+		});
+
+		it("should not create account without email", () => {
+			var data = { 
+				'name':'testy',
+				'email':'',
+				'password':'passy'
+			};
+			var req = genReq(data);
+			var res = genRes();
+			UserMock
+				.expects('setName')
+				.withArgs(data.name)
+				.returns(true);
+			UserMock
+				.expects('setEmail')
+				.withArgs(data.email)
+				.returns(false);
+			UserMock
+				.expects('setPassword')
+				.withArgs(data.password)
+				.returns(true);
+			return when(Account.createAccount(req, res, genNext()))
+				.then(() => {
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'email');
+					assert.equal(JSON.parse(res.resData).error,'Invalid email');
+				});
+		});
+
+		it("should not create account without password", () => {
+			var data = { 
+				'name':'testy',
+				'email':'test@testy.com',
+				'password':''
+			};
+			var req = genReq(data);
+			var res = genRes();
+			UserMock
+				.expects('setName')
+				.withArgs(data.name)
+				.returns(true);
+			UserMock
+				.expects('setEmail')
+				.withArgs(data.email)
+				.returns(true);
+			UserMock
+				.expects('setPassword')
+				.withArgs(data.password)
+				.returns(false);
+			return when(Account.createAccount(req, res, genNext()))
+				.then(() => {
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'password');
+					assert.equal(JSON.parse(res.resData).error,'Invalid password');
+				});
+		});
+	});
+
+
 	/*** Update ***/
 	context(".update", function() {
 
