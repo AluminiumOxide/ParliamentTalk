@@ -184,6 +184,24 @@ describe("Authentication", function() {
 				});
 		});
 
+		it("should not sign in with deleted account", () => {
+			var data = {
+				'name':'testy',
+				'password':'passy'
+			};
+			var req = genReq(data);
+			var res = genRes();
+			user = new User();
+			user.setDeleted();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			return when(Account.signIn(req, res, genNext()))
+				.then(() => {
+					assert.equal(res.statusCode,400);
+				});
+		});
+
 	});
 
 

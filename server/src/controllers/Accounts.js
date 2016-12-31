@@ -4,23 +4,6 @@ var mongoose = require('mongoose');
 var when = require('when');
 var User = mongoose.model('User');
 
-//exports.deleteAccount = function(req, res, next) {
-//  /**
-//   * parameters expected in the args:
-//  * xAuth (String)
-//  **/
-//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-//    var examples = {};
-//  examples['application/json'] = { };
-//  if(Object.keys(examples).length > 0) {
-//    res.setHeader('Content-Type', 'application/json');
-//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-//  }
-//  else {
-//    res.end();
-//  }
-//  
-//}
 
 //exports.recoverAccount = function(req, res, next) {
 //  /**
@@ -137,6 +120,7 @@ exports.viewAccount = function(req, res, next) {
 			return next();
 		});
 }
+
 /**
  * Signs up a new user
  * @param {http.request} req - The request object, with json body: { 
@@ -150,46 +134,47 @@ exports.viewAccount = function(req, res, next) {
 exports.createAccount = function(req, res, next) {
 
 	var args = (req && req.swagger && req.swagger.params) ? req.swagger.params : "";
-        var account = new User();
-        // check and set the name
-        return when(account.setName(req.body.name))
-                .then(success => {
-                        if(!success) {
+	var account = new User();
+	
+	// check and set the name
+	return when(account.setName(req.body.name))
+		.then(success => {
+			if(!success) {
 				res.statusCode = 400;
-                                res.end(JSON.stringify({
-                                        error: 'Invalid user name',
-                                        field: 'name'
-                                }));
+				res.end(JSON.stringify({
+					error: 'Invalid user name',
+					field: 'name'
+				}));
 				return next();
-                        }
+			}
 
-                        // check and set the email
-                        return when(account.setEmail(req.body.email))
-                                .then(success => {
-                                        if(!success) {
+			// check and set the email
+			return when(account.setEmail(req.body.email))
+				.then(success => {
+					if(!success) {
 						res.statusCode = 400;
-                                                res.end(JSON.stringify({
-                                                        error: 'Invalid email',
-                                                        field: 'email'
-                                                }));
+						res.end(JSON.stringify({
+							error: 'Invalid email',
+							field: 'email'
+						}));
 						return next();
-                                        }
+					}
 
-                                        // check and set the password
-                                        return when(account.setPassword(req.body.password))
-                                                .then(success => {
-                                                        if(!success) {
+					// check and set the password
+					return when(account.setPassword(req.body.password))
+						.then(success => {
+							if(!success) {
 								res.statusCode = 400;
-                                                                res.end(JSON.stringify({
-                                                                        error: 'Invalid password',
-                                                                        field: 'password'
-                                                                }));
+								res.end(JSON.stringify({
+									error: 'Invalid password',
+									field: 'password'
+								}));
 								return next();
-                                                        }
-
-                                                        // save the new user
-                                                        return when(account.save())
-                                                                .then(() => {
+							}
+		
+							// save the new user
+							return when(account.save())
+								.then(() => {
 									res.statusCode = 201;
 									res.end();
 									return next();
@@ -197,22 +182,22 @@ exports.createAccount = function(req, res, next) {
 									res.statusCode = 500;
 									res.end();
 									return next();
-                                                                });
+								});
 						}).otherwise(err => {
 							res.statusCode = 500;
 							res.end();
 							return next();
-                                                });
+						});
 				}).otherwise(err => {
 					res.statusCode = 500;
 					res.end();
 					return next();
-                                });
+				});
 		}).otherwise(err => {
 			res.statusCode = 500;
 			res.end();
 			return next();
-                });
+		});
 }
 
 /**
@@ -284,6 +269,48 @@ exports.updateAccount = function(req, res, next) {
 			return next();
 		});
 }
+/**
+ * Sets account to deleted
+ * @param {http.request} req - The request object, with x-access-token headers set
+ * @param {http.response} res - The response object:
+ *                              <li> 400 if invalid token, with json body: {error: string} </li>
+ *                              <li> 200 on success, with json body: { _id: string, name: string, email: string } </li>
+ */ 
+exports.deleteAccount = function(req, res, next) {
+	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+
+	// check the user's login
+	return when(verifyLogin(req))
+		.then(user => {
+			
+			// set the user to deleted
+			if(user.setDeleted()) {
+
+				// save the user
+				return when(user.save())
+					.then(() => {
+						res.statusCode = 200;
+						res.end();
+						return next();
+					})
+					.otherwise(err => {
+						res.statusCode = 500;
+						res.end(JSON.stringify({}));
+						return next();
+					});
+			} else {
+				res.statusCode = 400;
+				res.end(JSON.stringify({}));
+				return next();
+			}
+		})
+		.otherwise(err => {
+			res.statusCode = 400;
+			res.end(JSON.stringify({}));
+			return next();
+		});
+}
+
 
 /**
  * Verify login

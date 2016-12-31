@@ -47,6 +47,16 @@ var User = new mongoose.Schema({
 	 */
 	updated: Date,
 
+	/**
+	 * Whether or not the user has deleted thier account
+	 * @type boolean
+	 * @memberOf User
+	 */
+	deleted: {
+		type: Boolean,
+		default: false
+	},
+
 	/** 
 	 * The user's verification info: {email: boolean, code: string}
 	 * @type object
@@ -211,6 +221,18 @@ User.methods.checkPassword = function(password) {
 		return true;
 	}
 	return false;
+};
+
+/**
+ * Sets the account to deleted
+ * @function setDeleted
+ * @memberof User#
+ * @name setDeleted
+ * @returns {boolean} Whether the account was deleted
+ */
+User.methods.setDeleted = function() {
+	this.deleted = true;
+	return true;
 };
 
 /**

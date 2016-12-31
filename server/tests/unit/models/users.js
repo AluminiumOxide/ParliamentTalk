@@ -322,6 +322,28 @@ describe("User", function() {
 		});
 	});
 
+	/*** Set Deleted ***/
+	context("#setDeleted", function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			user = new User();
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should set to deleted", () => {
+			assert(user.setDeleted());
+		});
+	});
+
 	/*** Match Password ***/
 	context("#matchPassword", function() {
 

@@ -15,32 +15,39 @@ var User = mongoose.model('User');
  */
 exports.signIn = function(req, res, next) {
 	var args = (req && req.swagger && req.swagger.params) ? req.swagger.params : "";
-        return when(User.findOne({name:req.body.name}).exec())
-                .then(user => {
-                        if(!user) {
-                                res.statusCode = 400;
+	return when(User.findOne({name:req.body.name}).exec())
+		.then(user => {
+        	if(!user) {
+            	res.statusCode = 400;
 				res.end(JSON.stringify({
-                                        error: 'Invalid user name or password'
-                                }));
+					error: 'Invalid user name or password'
+				}));
 				return next();
-                        }
-                        if(user.matchPassword(req.body.password)) {
-                                return when(user.generateLogin())
-                                        .then(token => {
-                                                res.statusCode = 200;
+			}
+			if(user.deleted === true) {
+				res.statusCode = 400;
+				res.end(JSON.stringify({
+					error: 'Account is deleted'
+				}));
+				return next();
+			}
+			if(user.matchPassword(req.body.password)) {
+				return when(user.generateLogin())
+					.then(token => {
+						res.statusCode = 200;
 						res.end(JSON.stringify({
-                                                        token: token
-                                                }));
+							token: token
+						}));
 						return next();
-                                        });
-                        } else {
-                                res.statusCode = 400;
+					});
+			} else {
+				res.statusCode = 400;
 				res.end(JSON.stringify({
-                                        error: 'Invalid user name or password'
-                                }));
+					error: 'Invalid user name or password'
+				}));
 				return next();
-                        }
-                });
+			}
+		});
 };
 
 /**

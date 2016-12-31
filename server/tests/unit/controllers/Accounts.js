@@ -624,4 +624,105 @@ describe("Account", function() {
  		});
 	});
 
+	/*** Delete ***/
+	context(".delete", function() {
+
+		var ctx = '';
+		var user = '';
+		var UserMock = null;
+		var UserFindOneStub = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			UserMock = ctx.mock(User.prototype);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should set the user to deleted", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var req2 = genReq({},{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setDeleted')
+						.returns(true);
+					return when(Account.deleteAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,200);
+						});
+				});
+		});
+
+		it("should not delete the user with a bad token", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return false; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var req2 = genReq({},{'x-access-token':'badtoken'});
+					var res2 = genRes();
+					return when(Account.deleteAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,400);
+						});
+				});
+		});
+
+		it("should not delete the user with empty token", () => {
+			var req2 = genReq({},{'x-access-token':''});
+			var res2 = genRes();
+			return when(Account.deleteAccount(req2, res2, genNext()))
+				.then(() => {
+					assert.equal(res2.statusCode,400);
+				});
+		});
+
+		it("should not delete the user without login", () => {
+			var req2 = genReq({},{});
+			var res2 = genRes();
+			return when(Account.deleteAccount(req2, res2, genNext()))
+				.then(() => {
+					assert.equal(res2.statusCode,400);
+				});
+		});
+
+	});
+
 });
