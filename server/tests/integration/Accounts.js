@@ -21,7 +21,7 @@ module.exports = function(app, swagger) {
 		describe('Create Account', function() {
 			it('should create account', function(done) {
 				hippie(app, swagger)
-					.post('/api/signUp')
+					.post('/api/account')
 					.send({
 						"email":"testy@test.com",
 						"name":"testy",
@@ -40,7 +40,7 @@ module.exports = function(app, swagger) {
 			it('should not create account without email', function(done) {
 				try {
 					hippie(app, swagger)
-						.post('/api/signUp')
+						.post('/api/account')
 						.send({
 							"name":"testy",
 							"password":"abc123"
@@ -59,7 +59,7 @@ module.exports = function(app, swagger) {
 			it('should not create account without name', function(done) {
 				try {
 					hippie(app, swagger)
-						.post('/api/signUp')
+						.post('/api/account')
 						.send({
 							"email":"testy@test.com",
 							"password":"abc123"
@@ -77,7 +77,7 @@ module.exports = function(app, swagger) {
 			it('should not create account without password', function(done) {
 				try {
 					hippie(app, swagger)
-						.post('/api/signUp')
+						.post('/api/account')
 						.send({
 							"email":"testy@test.com",
 							"name":"testy",
@@ -94,7 +94,7 @@ module.exports = function(app, swagger) {
 			});
 			it('should not create account with duplicate email', function(done) {
 				hippie(app, swagger)
-					.post('/api/signUp')
+					.post('/api/account')
 					.send({
 						"email":"testy@test.com",
 						"name":"testy123",
@@ -111,7 +111,7 @@ module.exports = function(app, swagger) {
 			});
 			it('should not create account with duplicate user name', function(done) {
 				hippie(app, swagger)
-					.post('/api/signUp')
+					.post('/api/account')
 					.send({
 						"email":"testy123@test.com",
 						"name":"testy",
@@ -291,7 +291,7 @@ module.exports = function(app, swagger) {
 							if(body && body.token) {
 								hippie(app, swagger)
 									.header('x-access-token',body.token)
-									.post('/api/account')
+									.patch('/api/account')
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
@@ -330,7 +330,7 @@ module.exports = function(app, swagger) {
 							if(body && body.token) {
 								hippie(app, swagger)
 									.header('x-access-token','badtoken')
-									.post('/api/account')
+									.patch('/api/account')
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
@@ -351,7 +351,7 @@ module.exports = function(app, swagger) {
 			it('should not update account with out sign in', function(done) {
 				try {
 					hippie(app, swagger)
-						.post('/api/account')
+						.patch('/api/account')
 						.send({
 							"name":"testy1",
 							"email":"testy1@test.com",

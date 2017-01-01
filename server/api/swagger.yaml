@@ -42,6 +42,30 @@ paths:
     post:
       tags:
       - "accounts"
+      description: "Creates a new user account"
+      operationId: "createAccount"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "The data for the new user account"
+        required: true
+        schema:
+          $ref: "#/definitions/newUser"
+      responses:
+        201:
+          description: "boolean response to indicate success"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "sign up error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    patch:
+      tags:
+      - "accounts"
       description: "Updates a user's information"
       operationId: "updateAccount"
       produces:
@@ -92,12 +116,13 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
-  /account/recover:
+
+  /account/recover/password:
     post:
       tags:
       - "accounts"
-      description: "Recovers a user's account"
-      operationId: "recoverAccount"
+      description: "Recovers a user's password"
+      operationId: "recoverPassword"
       produces:
       - "application/json"
       parameters:
@@ -118,12 +143,65 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
-  /account/verify:
+  /account/recover/deleted:
+    post:
+      tags:
+      - "accounts"
+      description: "Recovers a user's deleted account"
+      operationId: "recoverDeleted"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "email"
+        description: "The user's email"
+        required: true
+        schema:
+          $ref: "#/definitions/email"
+      responses:
+        200:
+          description: "boolean success response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "recover error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/recover/username:
+    post:
+      tags:
+      - "accounts"
+      description: "Recovers a user's username"
+      operationId: "recoverUsername"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "email"
+        description: "The user's email"
+        required: true
+        schema:
+          $ref: "#/definitions/email"
+      responses:
+        200:
+          description: "boolean success response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "recover error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+
+  /account/verify/email:
     post:
       tags:
       - "accounts"
       description: "Verifies a user's account"
-      operationId: "verifyAccount"
+      operationId: "verifyEmail"
       produces:
       - "application/json"
       parameters:
@@ -149,38 +227,13 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
-  /account/verify/email:
+
+  /account/check/name:
     post:
       tags:
       - "accounts"
-      description: "Verifies if a user email would be valid"
-      operationId: "verifyEmail"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "email"
-        description: "The proposed email"
-        required: true
-        schema:
-          $ref: "#/definitions/email"
-      responses:
-        200:
-          description: "boolean response"
-          schema:
-            $ref: "#/definitions/yesNo"
-        default:
-          description: "verify error"
-          schema:
-            $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Accounts"
-    x-swagger-router-controller: "accounts"
-  /account/verify/name:
-    post:
-      tags:
-      - "accounts"
-      description: "Verifies if a user name would be valid"
-      operationId: "verifyName"
+      description: "Checks if a user name would be valid"
+      operationId: "checkName"
       produces:
       - "application/json"
       parameters:
@@ -201,12 +254,38 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
-  /account/verify/password:
+  /account/check/email:
     post:
       tags:
       - "accounts"
-      description: "Verifies if a user password would be valid"
-      operationId: "verifyPassword"
+      description: "Checks if a user email would be valid"
+      operationId: "checkEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "email"
+        description: "The proposed email"
+        required: true
+        schema:
+          $ref: "#/definitions/email"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "verify error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+  /account/check/password:
+    post:
+      tags:
+      - "accounts"
+      description: "Checks if a user password would be valid"
+      operationId: "checkPassword"
       produces:
       - "application/json"
       parameters:
@@ -227,6 +306,7 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
+
   /signIn:
     post:
       tags:
@@ -278,32 +358,7 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Authentication"
     x-swagger-router-controller: "accounts"
-  /signUp:
-    post:
-      tags:
-      - "accounts"
-      description: "Creates a new user account"
-      operationId: "createAccount"
-      produces:
-      - "application/json"
-      parameters:
-      - in: "body"
-        name: "user"
-        description: "The data for the new user account"
-        required: true
-        schema:
-          $ref: "#/definitions/newUser"
-      responses:
-        201:
-          description: "boolean response to indicate success"
-          schema:
-            $ref: "#/definitions/yesNo"
-        default:
-          description: "sign up error"
-          schema:
-            $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Accounts"
-    x-swagger-router-controller: "accounts"
+
 definitions:
   newUser:
     type: "object"
