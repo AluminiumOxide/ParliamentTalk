@@ -290,7 +290,7 @@ paths:
       - "application/json"
       parameters:
       - in: "body"
-        name: "name"
+        name: "password"
         description: "The proposed password"
         required: true
         schema:

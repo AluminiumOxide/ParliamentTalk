@@ -725,4 +725,52 @@ describe("Account", function() {
 
 	});
 
+	context(".checkName", function() {
+
+		var ctx = '';
+		var user = '';
+		var UserMock = null;
+		var UserFindOneStub = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should approve a potential name", () => {
+			var req1 = genReq(JSON.stringify('somethingunique'),{});
+			var res1 = genRes();
+			UserMock.expects('count').returns(0);
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve a duplicate potential name", () => {
+			var req1 = genReq(JSON.stringify('somethingnotunique'),{});
+			var res1 = genRes();
+			UserMock.expects('count').returns(1);
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an empty potential name", () => {
+			var req1 = genReq('',{});
+			var res1 = genRes();
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+	}); 
+
 });

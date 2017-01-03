@@ -69,14 +69,14 @@ describe("User", function() {
 				.expects('count')
 				.withArgs({'name':'testy'})
 				.returns(when(0));
-			return when(user.checkName('testy'))
+			return when(User.checkName('testy'))
 				.then(valid => {
 					assert.equal(valid,true);
 				});
 		});
 
 		it("should fail empty name", () => {
-			return when(user.checkName(''))
+			return when(User.checkName(''))
 				.then(valid => {
 					assert.equal(valid,false);
 				});
@@ -87,7 +87,7 @@ describe("User", function() {
 				.expects('count')
 				.withArgs({'name':'testy'})
 				.returns(when(1));
-			return when(user.checkName('testy'))
+			return when(User.checkName('testy'))
 				.then(valid => {
 					assert.equal(valid, false);
 				});
@@ -170,14 +170,14 @@ describe("User", function() {
 				.expects('count')
 				.withArgs({'email':'testy@test.com'})
 				.returns(when(0));
-			return when(user.checkEmail('testy@test.com'))
+			return when(User.checkEmail('testy@test.com'))
 				.then(valid => {
 					assert.equal(valid,true);
 				});
 		});
 
 		it("should fail empty email", () => {
-			return when(user.checkEmail(''))
+			return when(User.checkEmail(''))
 				.then(valid => {
 					assert.equal(valid,false);
 				});
@@ -188,7 +188,7 @@ describe("User", function() {
 				.expects('count')
 				.withArgs({'email':'testy@test.com'})
 				.returns(when(1));
-			return when(user.checkEmail('testy@test.com'))
+			return when(User.checkEmail('testy@test.com'))
 				.then(valid => {
 					assert.equal(valid, false);
 				});
@@ -267,14 +267,14 @@ describe("User", function() {
 		});
 
 		it("should pass good password", () => {
-			return when(user.checkPassword('passy'))
+			return when(User.checkPassword('passy'))
 				.then(valid => {
 					assert.equal(valid,true);
 				});
 		});
 
 		it("should fail empty password", () => {
-			return when(user.checkPassword(''))
+			return when(User.checkPassword(''))
 				.then(valid => {
 					assert.equal(valid,false);
 				});

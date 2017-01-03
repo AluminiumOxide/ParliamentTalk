@@ -480,5 +480,82 @@ module.exports = function(app, swagger) {
 					});
 			});
 		});
+
+		describe('Check Name', function() {
+
+			it('should approve a potential name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/name')
+					.send("testy123")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							if(res.body === 'true') {
+								assert(true);
+								return done();
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not approve a duplicate name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account')
+					.send({
+						"email":"testy123@test.com",
+						"name":"testy",
+						"password":"abc123"
+					})
+					.end(function(err, res, body) {
+						if (err) {
+							assert(true);
+						} else {
+							hippie(app, swagger)
+								.post('/api/account/check/name')
+								.send('testy')
+								.expectStatus(200)
+								.end(function(err, res, body) {
+									if(err) {
+										assert(false);
+										return done();
+									} else {
+										assert.equal(body,false);
+										return done();
+									}
+							});
+						}
+					});
+			});
+			it('should not approve an empty name', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/name')
+						.send("")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								if(res.body === 'false') {
+									assert(true);
+									return done();
+								} else {
+									assert(false);
+									return done();
+								}
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+		});
 	});
 };

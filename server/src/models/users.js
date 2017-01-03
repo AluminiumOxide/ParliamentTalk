@@ -113,7 +113,7 @@ User.pre('save', function(next) {
  * @returns {boolean} Whether or not the name was set
  */
 User.methods.setName = function(name) {
-	return when(this.checkName(name))
+	return when(User.checkName(name))
 		.then(valid => {
 			if(valid) {
 				this.name = name;
@@ -132,7 +132,7 @@ User.methods.setName = function(name) {
  * @param {string} name - The new user name
  * @returns {boolean} Whether or not the name is valid
  */
-User.methods.checkName = function(name) {
+User.statics.checkName = function(name) {
 	if(name) {
 		return when(User.count({'name':name}))
 			.then(count => {
@@ -156,7 +156,7 @@ User.methods.checkName = function(name) {
  * @returns {boolean} Whether the email was set
  */
 User.methods.setEmail = function(email) {
-	return when(this.checkEmail(email))
+	return when(User.checkEmail(email))
 		.then(valid => {
 			if(valid) {
 				this.email = email;
@@ -175,7 +175,7 @@ User.methods.setEmail = function(email) {
  * @param {string} email - The new email
  * @returns {boolean} Whether or not the email is unique
  */
-User.methods.checkEmail = function(email) {
+User.statics.checkEmail = function(email) {
 	if(email) {
 		return User.count({'email':email})
 			.then(count => {
@@ -199,7 +199,7 @@ User.methods.checkEmail = function(email) {
  * @returns {boolean} Whether the password was set
  */
 User.methods.setPassword = function(password) {
-	if(this.checkPassword(password)) {
+	if(User.checkPassword(password)) {
 		this.password = {};
 		this.password.salt = bcrypt.genSaltSync(10);
 		this.password.encrypted = bcrypt.hashSync(password, this.password.salt);
@@ -216,7 +216,7 @@ User.methods.setPassword = function(password) {
  * @param {string} password - The new password
  * @returns {boolean} Whether or not the password is valid
  */
-User.methods.checkPassword = function(password) {
+User.statics.checkPassword = function(password) {
 	if(password) {
 		return true;
 	}
