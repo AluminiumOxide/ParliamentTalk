@@ -326,6 +326,35 @@ exports.checkName = function(req,res,next) {
 		});
 };
 
+/**
+ * Checks a potential email
+ * @param {http.request} req - The request object
+ * @param {http.response} res - The response object:
+ * 								<li>200 with boolean body</li>
+ */
+exports.checkEmail = function(req,res,next) {
+	return when(User.checkEmail((req && req.body) ? JSON.parse(req.body) : ""))
+		.then(result => {
+			res.statusCode = 200;
+			res.end(result.toString());
+			return next();
+		});
+};
+
+/**
+ * Checks a potential password
+ * @param {http.request} req - The request object
+ * @param {http.response} res - The response object:
+ * 								<li>200 with boolean body</li>
+ */
+exports.checkPassword = function(req,res,next) {
+	return when(User.checkPassword((req && req.body) ? JSON.parse(req.body) : ""))
+		.then(result => {
+			res.statusCode = 200;
+			res.end(result.toString());
+			return next();
+		});
+};
 
 /**
  * Verify login

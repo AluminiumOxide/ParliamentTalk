@@ -375,6 +375,147 @@ module.exports = function(app, swagger) {
 // TODO: more tests here
 		});
 
+		describe('Check Name', function() {
+			it('should approve a potential name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/name')
+					.send("testy123")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert(res.body);
+							return done();
+						}
+					});
+			});
+			it('should not approve a duplicate name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/name')
+					.send('testy1')
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert.equal(body,false);
+							return done();
+						}
+				});
+			});
+			it('should not approve an empty name', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/name')
+						.send("")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+		});
+		describe('Check Email', function() {
+			it('should approve a potential email', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/email')
+					.send("testy123@testy.com")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert(res.body);
+							return done();
+						}
+					});
+			});
+			it('should not approve a duplicate email', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/email')
+					.send('testy1@test.com')
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert.equal(body,false);
+							return done();
+						}
+				});
+			});
+			it('should not approve an empty email', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+		});
+		describe('Check Password', function() {
+			it('should approve a potential password', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/password')
+					.send("testy123")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert(res.body);
+							return done();
+						}
+					});
+			});
+			it('should not approve an empty password', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+		});
 		describe('Delete Account', function() {
 			it('should not delete account with bad token', function(done) {
 				hippie(app, swagger)
@@ -478,83 +619,6 @@ module.exports = function(app, swagger) {
 							return done();
 						}
 					});
-			});
-		});
-
-		describe('Check Name', function() {
-
-			it('should approve a potential name', function(done) {
-				hippie(app, swagger)
-					.post('/api/account/check/name')
-					.send("testy123")
-					.expectStatus(200)
-					.end(function(err, res, body) {
-						if(err) {
-							assert(false);
-							return done();
-						} else {
-							if(res.body === 'true') {
-								assert(true);
-								return done();
-							} else {
-								assert(false);
-								return done();
-							}
-						}
-					});
-			});
-			it('should not approve a duplicate name', function(done) {
-				hippie(app, swagger)
-					.post('/api/account')
-					.send({
-						"email":"testy123@test.com",
-						"name":"testy",
-						"password":"abc123"
-					})
-					.end(function(err, res, body) {
-						if (err) {
-							assert(true);
-						} else {
-							hippie(app, swagger)
-								.post('/api/account/check/name')
-								.send('testy')
-								.expectStatus(200)
-								.end(function(err, res, body) {
-									if(err) {
-										assert(false);
-										return done();
-									} else {
-										assert.equal(body,false);
-										return done();
-									}
-							});
-						}
-					});
-			});
-			it('should not approve an empty name', function(done) {
-				try {
-					hippie(app, swagger)
-						.post('/api/account/check/name')
-						.send("")
-						.expectStatus(200)
-						.end(function(err, res, body) {
-							if(err) {
-								assert(false);
-								return done();
-							} else {
-								if(res.body === 'false') {
-									assert(true);
-									return done();
-								} else {
-									assert(false);
-									return done();
-								}
-							}
-						});
-				} catch(e) {
-					assert(true);
-					return done();
-				}
 			});
 		});
 	});

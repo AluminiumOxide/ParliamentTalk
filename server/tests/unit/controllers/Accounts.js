@@ -772,5 +772,88 @@ describe("Account", function() {
 		});
 
 	}); 
+	context(".checkEmail", function() {
+
+		var ctx = '';
+		var user = '';
+		var UserMock = null;
+		var UserFindOneStub = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should approve a potential email", () => {
+			var req1 = genReq(JSON.stringify('somethingunique@testy.com'),{});
+			var res1 = genRes();
+			UserMock.expects('count').returns(when(0));
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve a duplicate potential email", () => {
+			var req1 = genReq(JSON.stringify('testy@test.com'),{});
+			var res1 = genRes();
+			UserMock.expects('count').returns(when(1));
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an empty potential email", () => {
+			var req1 = genReq('',{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+	}); 
+	context(".checkPassword", function() {
+
+		var ctx = '';
+		var user = '';
+		var UserMock = null;
+		var UserFindOneStub = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should approve a potential password", () => {
+			var req1 = genReq(JSON.stringify('asdfasdfasdfasdf'),{});
+			var res1 = genRes();
+			UserMock.expects('count').returns(0);
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve an empty potential password", () => {
+			var req1 = genReq('',{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+	}); 
 
 });
