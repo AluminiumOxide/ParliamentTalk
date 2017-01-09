@@ -117,6 +117,42 @@ paths:
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
 
+  /account/verify/email:
+    post:
+      tags:
+      - "accounts"
+      description: "Verifies a user's account"
+      operationId: "verifyEmail"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "x-access-token"
+        description: "The session token"
+        required: false
+        type: "string"
+      - in: "body"
+        name: "verificationObject"
+        description: "The verification object"
+        required: false
+        schema:
+          $ref: "#/definitions/verificationObject"
+      responses:
+        200:
+          description: "boolean response to indicate success"
+          schema:
+            $ref: "#/definitions/yesNo"
+        400:
+          description: "sign up error"
+          schema:
+            $ref: "#/definitions/errorModel"
+        default:
+          description: "sign up error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
+
   /account/recover/password:
     post:
       tags:
@@ -137,6 +173,10 @@ paths:
           description: "boolean success response"
           schema:
             $ref: "#/definitions/yesNo"
+        400:
+          description: "recover error"
+          schema:
+            $ref: "#/definitions/errorModel"
         default:
           description: "recover error"
           schema:
@@ -196,37 +236,7 @@ paths:
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
 
-  /account/verify/email:
-    post:
-      tags:
-      - "accounts"
-      description: "Verifies a user's account"
-      operationId: "verifyEmail"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "x-access-token"
-        in: "header"
-        description: "The session token"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "verificationCode"
-        description: "The verification code"
-        required: true
-        schema:
-          $ref: "#/definitions/verificationCode"
-      responses:
-        200:
-          description: "boolean response"
-          schema:
-            $ref: "#/definitions/yesNo"
-        default:
-          description: "verify error"
-          schema:
-            $ref: "#/definitions/errorModel"
-      x-swagger-router-controller: "Accounts"
-    x-swagger-router-controller: "accounts"
+
 
   /account/check/name:
     post:
@@ -414,13 +424,20 @@ definitions:
       token:
         $ref: "#/definitions/tokenString"
     description: "authentication token"
+  verificationObject:
+    type: "object"
+    properties:
+      email:
+        $ref: "#/definitions/email"
+      verificationCode:
+        $ref: "#/definitions/verificationCode"
   errorModel:
     type: "object"
     required:
-    - "code"
+    - "statusCode"
     - "message"
     properties:
-      code:
+      statusCode:
         type: "integer"
         format: "int32"
       message:
@@ -447,6 +464,7 @@ definitions:
   password:
     type: "string"
     description: "A password"
+
 parameters:
   tokenParam:
     name: "x-access-token"

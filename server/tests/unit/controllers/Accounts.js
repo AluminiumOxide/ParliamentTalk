@@ -854,6 +854,149 @@ describe("Account", function() {
 				});
 		});
 
+	});
+	context(".verifyEmail", function() {
+
+		context("1st request", function() {
+
+			var ctx = '';
+			var user = '';
+			var UserMock = null;
+			var UserFindOneStub = null;
+	
+			beforeEach(function() {
+				ctx = sinon.sandbox.create();
+				ctx.stub(User.prototype,'save',function(next) {return next();});
+				UserMock = ctx.mock(User);
+			});
+	
+			afterEach(function() {
+				ctx.restore();
+			});
+	
+			it("should verify email", () => {
+				var req = genReq({},{'x-access-token':'asdfasdf'});
+				var res = genRes();
+				ctx.stub(User.prototype,'generateEmailVerification',function() { return true; });	
+				user = new User();
+				ctx.stub(User,'verifyLogin',function() { return user; });
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),true);
+						assert.equal(res.statusCode,200);
+					});
+			});
+	
+			it("should not verify without valid login", () => {
+				var req = genReq({},{'x-access-token':'asdfasdf'});
+				var res = genRes();
+				ctx.stub(User,'verifyLogin',function() { return when.reject(); });
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,400);
+					});
+			});
+
+			it("should not verify without an access token", () => {
+				var req = genReq({},{});
+				var res = genRes();
+				ctx.stub(User,'verifyLogin',function() { return when.reject(); });
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,400);
+					});
+			});
+
+			it("should not verify email, if it has already been verified", () => {
+				var req = genReq({},{'x-access-token':'asdfasdf'});
+				var res = genRes();
+				ctx.stub(User.prototype,'generateEmailVerification',function() { return false; });	
+				user = new User();
+				ctx.stub(User,'verifyLogin',function() { return user; });
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+		});
+
+		context("2nd request", function() {
+
+			var ctx = '';
+			var user = '';
+			var UserMock = null;
+			var UserFindOneStub = null;
+	
+			beforeEach(function() {
+				ctx = sinon.sandbox.create();
+				ctx.stub(User.prototype,'save',function(next) {return next();});
+				user = new User();
+				UserMock = ctx.mock(User);
+			});
+	
+			afterEach(function() {
+				ctx.restore();
+			});
+	
+			it("should verify email", () => {
+				var req = genReq({'email':'testy@test.com','verificationCode':'testtest'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyEmailVerification',function(){return true;});
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert(JSON.parse(res.resData));
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify email, if bad email provided", () => {
+				var req = genReq({'email':'bademail@test.com','verificationCode':'testtest'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyEmailVerification',function(){return false;});
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify email, if no email provided", () => {
+				var req = genReq({'email':'','verificationCode':'testtest'},{});
+				var res = genRes();
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify email, if bad code provided", () => {
+				var req = genReq({'email':'testy@test.com','verificationCode':'badcode'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyEmailVerification',function(){return false;});
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify email, if no code provided", () => {
+				var req = genReq({'email':'testy@test.com','verificationCode':''},{});
+				var res = genRes();
+				return when(Account.verifyEmail(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+		});
+
 	}); 
 
 });

@@ -516,6 +516,276 @@ module.exports = function(app, swagger) {
 				}
 			});
 		});
+		describe('Verify Email', function() {
+
+			it('should not verify email first request, without auth token', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						hippie(app, swagger)
+							.header('x-access-token','')
+							.post('/api/account/verify/email')
+							.send(null)
+							.expectStatus(400)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'false');
+								return done();
+							});
+					});
+			});
+			it('should not verify email first request, with bad token', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						hippie(app, swagger)
+							.header('x-access-token','badtoken')
+							.post('/api/account/verify/email')
+							.send(null)
+							.expectStatus(400)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'false');
+								return done();
+							});
+					});
+			});
+			it('should not verify email first request, without login', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/verify/email')
+					.send(null)
+					.expectStatus(400)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						}
+						assert.equal(res.body,'false');
+						return done();
+					});
+			});
+			it('should verify email', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						hippie(app, swagger)
+							.header('x-access-token',body.token)
+							.post('/api/account/verify/email')
+							.send(null)
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert(res.body,'true');
+								return when(User.findOne({'name':'testy1'}).exec())
+									.then(newuser => {
+										hippie(app, swagger)
+											.post('/api/account/verify/email')
+											.send({
+												email:newuser.email,
+												verificationCode:newuser.verified.code
+											})
+											.expectStatus(200)
+											.end(function(err, res, body) {
+												if(err) {
+													assert(false);
+													return done();
+												}
+												assert.equal(res.body,'true');
+												return done();
+											});
+									});
+							});
+					});
+			});
+			it('should not verify email first request, if already verified', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						hippie(app, swagger)
+							.header('x-access-token',body.token)
+							.post('/api/account/verify/email')
+							.send(null)
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'false');
+								return done();
+							});
+					});
+			});
+			it('should not verify email second request, if bad email provided', function(done) {
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(user => {	
+						when(user.resetEmailVerification())
+							.then(user => {
+								hippie(app, swagger)
+									.post('/api/signIn')
+									.send({
+										"name":"testy1",
+										"password":"qwerqwer"
+									})
+									.expectStatus(200)
+									.end(function(err, res, body) {
+										hippie(app, swagger)
+											.header('x-access-token',body.token)
+											.post('/api/account/verify/email')
+											.send(null)
+											.expectStatus(200)
+											.end(function(err, res, body) {
+												if(err) {
+													assert(false);
+													return done();
+												}
+												assert.equal(res.body,'true');
+												hippie(app, swagger)
+													.post('/api/account/verify/email')
+													.send({
+														email: 'bad.email@test.com',
+														verificationCode: user.verified.code
+													})
+													.expectStatus(200)
+													.end(function(err, res, body) {
+														if(err) {
+															assert(false);
+															return done();
+														}
+														assert.equal(res.body,'false');
+														return done();
+													});
+											});
+									});
+							});
+					});
+			});
+			it('should not verify email second request, if no email provided', function(done) {
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(newuser => {
+						hippie(app, swagger)
+							.post('/api/account/verify/email')
+							.send({
+								verificationCode:newuser.verified.code
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'false');
+								return done();
+							});
+					});	
+			});
+			it('should not verify email second request, if no verification code provided', function(done) {
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(newuser => {
+						hippie(app, swagger)
+							.post('/api/account/verify/email')
+							.send({
+								email: newuser.email
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'false');
+								return done();
+							});
+					});
+			});	
+			it('should not verify email second request, if bad verification code provided', function(done) {
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(newuser => {
+						hippie(app, swagger)
+							.post('/api/account/verify/email')
+							.send({
+								email: newuser.email,
+								verificationCode:'badverificationcode'
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'false');
+								return done();
+							});
+					});	
+			});
+			it('should not verify email second request, if already verified', function(done) {
+				var email = null;
+				var code = null;
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(newuser => {
+						email = newuser.email;
+						code = newuser.verified.code;
+						hippie(app, swagger)
+							.post('/api/account/verify/email')
+							.send({
+								email: email,
+								verificationCode: code
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								}
+								assert.equal(res.body,'true');
+								hippie(app, swagger)
+									.post('/api/account/verify/email')
+									.send({
+										email: email,
+										verificationCode: code
+									})
+									.expectStatus(200)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(false);
+											return done();
+										}
+										assert.equal(res.body,'false');
+										return done();
+									});
+							});
+					});	
+			});
+		});
 		describe('Delete Account', function() {
 			it('should not delete account with bad token', function(done) {
 				hippie(app, swagger)
@@ -621,5 +891,7 @@ module.exports = function(app, swagger) {
 					});
 			});
 		});
+
+
 	});
 };

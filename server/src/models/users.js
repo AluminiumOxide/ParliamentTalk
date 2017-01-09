@@ -159,8 +159,11 @@ User.methods.setEmail = function(email) {
 	return when(User.checkEmail(email))
 		.then(valid => {
 			if(valid) {
-				this.email = email;
-				return true;
+				return when(this.resetEmailVerification())
+					.then(() => {
+						this.email = email;
+						return true;
+					});
 			} else {
 				return false;
 			}
@@ -302,6 +305,49 @@ User.statics.verifyLogin = function(tokenstr) {
 		.otherwise(err => {
 			return false;
 		});
+};
+
+/**
+ * Generates and saves an email verification object
+ * @function generateEmailVerification
+ * @memberof User#
+ * @name generateEmailVerification
+ * @returns {boolean} - if successfully updated
+ */
+User.methods.generateEmailVerification = function() {
+	if(!this.verified.email) {
+		this.verified.code = bcrypt.genSaltSync(10);
+		return when(this.save());
+	} else {
+		return when(false);
+	}
+};
+
+/**
+ * Verifies an email and updates the account
+ * @function verifyEmailVerification
+ */ 
+User.statics.verifyEmailVerification = function(email,code) {
+	return when(User.findOne({email:email}).exec())
+		.then(user => {
+			if(!!user && user.verified.code === code) {
+				user.verified.email = true;
+				user.verified.code = '';
+				return when(user.save());
+			} else {
+				return false;
+			}
+		});
+};
+
+/**
+ * Resets an account's email verification to false
+ * @function resetEmailVerification
+ */
+User.methods.resetEmailVerification = function() {
+	this.verified.email = false;
+	this.verified.code = '';
+	return when(this.save());	
 };
 
 // Create a model from the schema

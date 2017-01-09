@@ -3,100 +3,7 @@
 var mongoose = require('mongoose');
 var when = require('when');
 var User = mongoose.model('User');
-
-
-//exports.recoverAccount = function(req, res, next) {
-//  /**
-//   * parameters expected in the args:
-//  * email (Email)
-//  **/
-//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-//    var examples = {};
-//  examples['application/json'] = { };
-//  if(Object.keys(examples).length > 0) {
-//    res.setHeader('Content-Type', 'application/json');
-//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-//  }
-//  else {
-//    res.end();
-//  }
-//  
-//}
-
-
-
-//exports.verifyAccount = function(req, res, next) {
-//  /**
-//   * parameters expected in the args:
-//  * xAuth (String)
-//  * verificationCode (VerificationCode)
-//  **/
-//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-//    var examples = {};
-//  examples['application/json'] = { };
-//  if(Object.keys(examples).length > 0) {
-//    res.setHeader('Content-Type', 'application/json');
-//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-//  }
-//  else {
-//    res.end();
-//  }
-//  
-//}
-
-//exports.verifyEmail = function(req, res, next) {
-//  /**
-//   * parameters expected in the args:
-//  * email (Email)
-//  **/
-//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-//    var examples = {};
-//  examples['application/json'] = { };
-//  if(Object.keys(examples).length > 0) {
-//    res.setHeader('Content-Type', 'application/json');
-//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-//  }
-//  else {
-//    res.end();
-//  }
-//  
-//}
-
-//exports.verifyName = function(req, res, next) {
-//  /**
-//   * parameters expected in the args:
-//  * name (Username)
-//  **/
-//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-//    var examples = {};
-//  examples['application/json'] = { };
-//  if(Object.keys(examples).length > 0) {
-//    res.setHeader('Content-Type', 'application/json');
-//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-//  }
-//  else {
-//    res.end();
-//  }
-//  
-//}
-
-//exports.verifyPassword = function(req, res, next) {
-//  /**
-//   * parameters expected in the args:
-//  * name (Password)
-//  **/
-//	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
-//    var examples = {};
-//  examples['application/json'] = { };
-//  if(Object.keys(examples).length > 0) {
-//    res.setHeader('Content-Type', 'application/json');
-//    res.end(JSON.stringify(examples[Object.keys(examples)[0]] || {}, null, 2));
-//  }
-//  else {
-//    res.end();
-//  }
-//  
-//}
+var emailer = require('../lib/emailer');
 
 /**
  * View user data
@@ -355,6 +262,73 @@ exports.checkPassword = function(req,res,next) {
 			return next();
 		});
 };
+
+/**
+ * Verifies an email address
+ * @param {http.request} req - The request object
+ * @param {http.response} res - The response object:
+ * 								<li>200 with boolean body</li>
+ */
+exports.verifyEmail = function(req, res, next) {
+
+	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
+	if(!!req.body.email || !!req.body.verificationCode) {
+		if(!!req.body.email && !!req.body.verificationCode) {
+			return when(User.verifyEmailVerification(req.body.email,req.body.verificationCode))
+				.then(generated => {
+					if(generated) {
+						res.statusCode = 200;
+						res.end(JSON.stringify(true));
+						return next();
+					} else {
+						res.statusCode = 200;
+						res.end(JSON.stringify(false));
+						return next();
+					}
+				}).otherwise(err => {
+					res.statusCode = 500;
+					res.end(JSON.stringify(false));
+					return next();
+				});
+		} else {
+			res.statusCode = 200;
+			res.end(JSON.stringify(false));
+			return next();
+		}
+	} else {	
+		return when(verifyLogin(req))
+			.then(user => {
+				return when(user.generateEmailVerification())
+					.then(generated => {
+						if(generated) {
+							return when(emailer.sendEmail('emailVerify',user._id))
+								.then(() => {
+									res.statusCode = 200;
+									res.end(JSON.stringify(true));
+									return next();
+								}).otherwise(err => {
+									res.statusCode = 500;
+									res.end(JSON.stringify(false));
+									return next();
+								});
+						} else {
+							res.statusCode = 200;
+							res.end(JSON.stringify(false));
+							return next();
+						}
+					}).otherwise(err => {
+						res.statusCode = 500;
+						res.end(JSON.stringify(false));
+						return next();
+					});
+			})
+			.otherwise(err => {
+				res.statusCode = 400;
+				res.end(JSON.stringify(false));
+				return next();
+			});
+	}
+}
 
 /**
  * Verify login

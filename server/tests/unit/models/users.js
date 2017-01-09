@@ -205,6 +205,7 @@ describe("User", function() {
 
 		beforeEach(function() {
 			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
 			user = new User();
 			UserMock = ctx.mock(User);
 		});
@@ -223,6 +224,21 @@ describe("User", function() {
 					assert.equal(valid,true);
 					assert.equal(user.email,'testy@test.com');
 				});
+		});
+
+		it("should set good email and update email verification", () => {
+			UserMock
+				.expects('count')
+				.withArgs({'email':'testy@test.com'})
+				.returns(when(0));
+			user.verified.email = true;
+			return when(user.setEmail('testy@test.com'))
+				.then(valid => {
+					assert.equal(valid,true);
+					assert.equal(user.email,'testy@test.com');
+					assert.equal(user.verified.email,false);
+				});
+			
 		});
 
 		it("should not set empty email", () => {
@@ -527,4 +543,156 @@ describe("User", function() {
 
 	});
 
+	/*** Generate Email Verification ***/
+	context(".generateEmailVerification", function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should generate email verification", () => {
+			return when(user.generateEmailVerification())
+				.then(r => {
+					assert(user.verified.code);
+				}).otherwise(err => {
+					assert(false);
+				});			
+		});
+
+		it("should not generate email verification, if already verified", () => {
+			user.verified.email = true;
+			return when(user.generateEmailVerification())
+				.then(r => {
+					assert.equal(r,false);
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+	});
+
+	/*** Verify Email Verification ***/
+	context('.verifyEmailVerification', function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			ctx.stub(User,'findOne',function(args) {
+				if(args.email && args.email == 'testy@test.com') {
+					return {exec:function(){return user;}};
+				} else if(args.email && args.email == 'bademail@test.com') {
+					return {exec: function(){return new User();}};
+				} else {
+					return {exec:function(){return null;}};
+				}
+			});
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should verify email", () => {
+			user.verified.code = "testtest";
+			return when(User.verifyEmailVerification('testy@test.com','testtest'))
+				.then(() => {
+					assert.equal(user.verified.email,true);
+					assert.equal(user.verified.code,'');
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+
+		it("should not verify email with no email", () => {
+			user.verified.code = "testtest";
+			return when(User.verifyEmailVerification('','testtest'))
+				.then(() => {
+					assert.equal(user.verified.email,false);
+					assert.equal(user.verified.code,'testtest');
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+
+		it("should not verify email with bad email", () => {
+			user.verified.code = "testtest";
+			return when(User.verifyEmailVerification('bademail@test.com','testtest'))
+				.then(() => {
+					assert.equal(user.verified.email,false);
+					assert.equal(user.verified.code,'testtest');
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+
+		it("should not verify email with no code", () => {
+			user.verified.code = "testtest";
+			return when(User.verifyEmailVerification('testy@test.com',''))
+				.then(() => {
+					assert.equal(user.verified.email,false);
+					assert.equal(user.verified.code,'testtest');
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+
+		it("should not verify email with bad code", () => {
+			user.verified.code = "testtest";
+			return when(User.verifyEmailVerification('testy@test.com','badcode'))
+				.then(() => {
+					assert.equal(user.verified.email,false);
+					assert.equal(user.verified.code,'testtest');
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+
+	});
+
+	/*** Reset Email Verification ***/
+	context('.resetEmailVerification', function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should reset email verification", () => {
+			user.verified.email = true;
+			user.verified.code = 'asdfsadfdf';
+			return when(user.resetEmailVerification())
+				.then(r => {
+					assert.equal(user.verified.email,false);
+					assert.equal(user.verified.code,'');
+				}).otherwise(err => {
+					assert(false);
+				});
+		});
+	});
 });
