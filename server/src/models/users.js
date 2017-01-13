@@ -57,6 +57,23 @@ var User = new mongoose.Schema({
 		default: false
 	},
 
+	/**
+	 * The recovery object: {field: string, code: string}
+	 * @type object
+	 * @memberOf User
+	 */
+	recovery: {
+		field: {
+			type: String,
+		//	enum: ['deleted','name','password'],
+			default: ''
+		},
+		code: {
+			type: String,
+			default: ''
+		}
+	},		
+
 	/** 
 	 * The user's verification info: {email: boolean, code: string}
 	 * @type object
@@ -349,6 +366,53 @@ User.methods.resetEmailVerification = function() {
 	this.verified.code = '';
 	return when(this.save());	
 };
+
+/**
+ * Generates an account recovery code
+ * @function generateAccountRecovery
+ */
+User.statics.generateAccountRecovery = function(email) {
+	if(!!email) {
+		return when(User.findOne({email:email}).exec())
+			.then(user => {
+				if(!!user && user.deleted) {
+					user.recovery.field = 'deleted';
+					user.recovery.code = bcrypt.genSaltSync(10);
+					return when(user.save());
+				} else {
+					return when(false);
+				}
+			});
+	} else {
+		return when(false);
+	}
+};
+
+/**
+ * Verifies an account recovery code
+ * @function verifyAccountRecovery
+ */
+User.statics.verifyAccountRecovery = function(email,code,password) {
+	if(!!email && !!code && !!password) {
+		return when(User.findOne({email:email}).exec())
+			.then(user => {
+				if(!!user && user.recovery.code === code) {
+					return when(user.setPassword(password))
+						.then(() => {
+							user.deleted = false;
+							user.recovery.field = null;
+							user.recovery.code = '';
+							return when(user.save());
+						});
+				} else {
+					return when(false);
+				}
+			});
+	} else {
+		return when(false);
+	}
+};
+
 
 // Create a model from the schema
 User = mongoose.model('User', User);

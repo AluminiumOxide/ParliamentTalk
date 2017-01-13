@@ -997,6 +997,152 @@ describe("Account", function() {
 
 		});
 
-	}); 
+	});
+ 
+	describe('.recoverDeleted', () => {
 
+		describe('1st Request', () => {
+
+			var ctx = '';
+			var user = '';
+			var UserMock = null;
+			var UserFindOneStub = null;
+	
+			beforeEach(function() {
+				ctx = sinon.sandbox.create();
+				ctx.stub(User.prototype,'save',function(next) {return next();});
+				user = new User();
+				UserMock = ctx.mock(User);
+			});
+	
+			afterEach(function() {
+				ctx.restore();
+			});
+
+			it("should generate account recovery", () => {
+				var req = genReq({'email':'testy@test.com'},{});
+				var res = genRes();
+				ctx.stub(User,'generateAccountRecovery',function(){return true;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),true);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not generate account recovery, if no email provided", () => {
+				var req = genReq({},{});
+				var res = genRes();
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not generate account recovery, if bad email provided", () => {
+				var req = genReq({'email':'testy@test.com'},{});
+				var res = genRes();
+				ctx.stub(User,'generateAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+		});
+
+		describe('2nd Request', () => {
+
+			var ctx = '';
+			var user = '';
+			var UserMock = null;
+			var UserFindOneStub = null;
+	
+			beforeEach(function() {
+				ctx = sinon.sandbox.create();
+				ctx.stub(User.prototype,'save',function(next) {return next();});
+				user = new User();
+				UserMock = ctx.mock(User);
+			});
+	
+			afterEach(function() {
+				ctx.restore();
+			});
+
+			it("should verify account recovery", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'asdf'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return true;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),true);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify account recovery, if no email provided", () => {
+				var req = genReq({'code':'asdf','password':'asdf'},{});
+				var res = genRes();
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify account recovery, if bad email provided", () => {
+				var req = genReq({'email':'bad@email.com','code':'asdf','password':'asdf'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify account recovery, if no code provided", () => {
+				var req = genReq({'email':'testy@test.com','password':'asdf'},{});
+				var res = genRes();
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify account recovery, if bad code provided", () => {
+				var req = genReq({'email':'bad@email.com','code':'badcode','password':'asdf'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify account recovery, if no password provided", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf'},{});
+				var res = genRes();
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify account recovery, if bad password provided", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':''},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});			
+		});
+	});
 });

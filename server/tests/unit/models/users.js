@@ -695,4 +695,162 @@ describe("User", function() {
 				});
 		});
 	});
+
+	/*** Generate Account Recovery ***/
+	context('.generateAccountRecovery', function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			user.email = 'testy@test.com';
+			ctx.stub(User,'findOne',function(args) {
+				if(args.email && args.email == 'testy@test.com') {
+					return {exec:function(){return user;}};
+				} else if(args.email && args.email == 'bademail@test.com') {
+					return {exec: function(){return new User();}};
+				} else {
+					return {exec:function(){return null;}};
+				}
+			});
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it('should generate account recovery code', () => {
+			user.setDeleted();
+			return when(User.generateAccountRecovery('testy@test.com'))
+				.then(() => {
+					assert.equal(user.recovery.field,'deleted');
+					assert(user.recovery.code);
+				});
+		});
+
+		it('should not generate account recovery, if not deleted', () => {
+			user.deleted = false;
+			user.recovery = {field:'',code:''};
+			return when(User.generateAccountRecovery('testy@test.com'))
+				.then(user => {
+					assert.equal(user,false);
+				});
+		});
+
+		it('should not generate account recovery with no email', () => {
+			return when(User.generateAccountRecovery(''))
+				.then(user => {
+					assert.equal(user,false);
+				});
+		});
+
+		it('should not generate account recovery with bad email', () => {
+			return when(User.generateAccountRecovery('bademail@test.com'))
+				.then(user => {
+					assert.equal(user,false);
+				});
+		});
+	});
+
+	/*** Validate Account Recovery ***/
+	context('#validateAccountRecovery', function() {
+
+		var ctx = null;
+		var user = null;
+		var UserMock = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+            ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			user.email = 'testy@test.com';
+			ctx.stub(User,'findOne',function(args) {
+				if(args.email && args.email == 'testy@test.com') {
+					return {exec:function(){return user;}};
+				} else if(args.email && args.email == 'bademail@test.com') {
+					return {exec: function(){return new User();}};
+				} else {
+					return {exec:function(){return null;}};
+				}
+			});
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it('should verify and recover account', () => {
+			user.setDeleted();
+			return when(User.generateAccountRecovery(user.email))
+				.then(() => {
+					return when(User.verifyAccountRecovery(user.email,user.recovery.code,'test12345'))
+						.then(() => {
+							assert.equal(user.deleted, false);
+							assert.equal(user.recovery.field, null);
+							assert.equal(user.recovery.code, '');
+							assert(user.matchPassword('test12345'));
+						});
+				});
+		});
+
+		it('should not verify account which is not deleted', () => {
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'test12345'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with no email', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery('',user.recovery.code,'test12345'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad email', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery('bad.email@test.com',user.recovery.code,'test12345'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with no code', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,'','test12345'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad code', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,'badcode','test12345'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with no password', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,''))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad password', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,''))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+	});
 });

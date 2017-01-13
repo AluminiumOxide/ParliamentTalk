@@ -193,11 +193,11 @@ paths:
       - "application/json"
       parameters:
       - in: "body"
-        name: "email"
-        description: "The user's email"
-        required: true
+        name: "recoveryObject"
+        description: "The recovery object"
+        required: false
         schema:
-          $ref: "#/definitions/email"
+          $ref: "#/definitions/recoveryObject"
       responses:
         200:
           description: "boolean success response"
@@ -430,6 +430,13 @@ definitions:
       email:
         $ref: "#/definitions/email"
       verificationCode:
+        $ref: "#/definitions/verificationCode"
+  recoveryObject:
+    type: "object"
+    properties:
+      email:
+        $ref: "#/definitions/email"
+      code:
         $ref: "#/definitions/verificationCode"
   errorModel:
     type: "object"
