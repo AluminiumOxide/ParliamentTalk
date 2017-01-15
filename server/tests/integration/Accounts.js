@@ -1125,5 +1125,59 @@ module.exports = function(app, swagger) {
 					});
 			});
 		});
+		describe('Recover forgotten username', () => {
+			it('should send username via email', function(done) {
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/username')
+							.send({
+								"email":user.email
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'true');
+									return done();
+								}
+							});
+					});
+			});
+			it('should not send email, if no email provided', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/recover/username')
+					.send({})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert.equal(res.body,'false');
+							return done();
+						}
+					});
+			});
+			it('should not send email, if bad email provided', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/recover/username')
+					.send({
+						"email":"bad.email@bad.com"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert.equal(res.body,'false');
+							return done();
+						}
+					});
+			});
+		});
 	});
 };

@@ -223,7 +223,7 @@ paths:
         description: "The user's email"
         required: true
         schema:
-          $ref: "#/definitions/email"
+          $ref: "#/definitions/emailObject"
       responses:
         200:
           description: "boolean success response"
@@ -438,6 +438,11 @@ definitions:
         $ref: "#/definitions/email"
       code:
         $ref: "#/definitions/verificationCode"
+  emailObject:
+    type: "object"
+    properties:
+      email:
+        $ref: "#/definitions/email"
   errorModel:
     type: "object"
     required:

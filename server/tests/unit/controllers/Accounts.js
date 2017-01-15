@@ -1145,4 +1145,60 @@ describe("Account", function() {
 			});			
 		});
 	});
+
+	describe('.recoverUsername', () => {
+		var ctx = '';
+		var user = '';
+		var UserMock = null;
+		var UserFindOneStub = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			ctx.stub(User.prototype,'save',function(next) {return next();});
+			user = new User();
+			UserMock = ctx.mock(User);
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should send username recovery email", () => {
+			var req = genReq({'email':'testy@test.com'})
+			var res = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			return when(Account.recoverUsername(req,res,genNext()))
+				.then(() => {
+					assert.equal(JSON.parse(res.resData),true);
+					assert.equal(res.statusCode,200);
+				});
+		});
+
+		it("should not send username recovery email, if no email provided", () => {
+			var req = genReq({})
+			var res = genRes();
+			user = new User();
+			return when(Account.recoverUsername(req,res,genNext()))
+				.then(() => {
+					assert.equal(JSON.parse(res.resData),false);
+					assert.equal(res.statusCode,200);
+				});
+		});
+
+		it("should not send username recovery email, if bad email provided", () => {
+			var req = genReq({'email':'bad.email@test.com'})
+			var res = genRes();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return null;}}
+			});
+			return when(Account.recoverUsername(req,res,genNext()))
+				.then(() => {
+					assert.equal(JSON.parse(res.resData),false);
+					assert.equal(res.statusCode,200);
+				});
+		}); 
+	});
 });
