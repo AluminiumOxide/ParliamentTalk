@@ -14,7 +14,7 @@ module.exports = function(app, swagger) {
 				.then(success => {
 					return when(user.setEmail("testy@test.com"))
 						.then(success => {
-							return when(user.setPassword("abc123"))
+							return when(user.setPassword("abc123+XYZ"))
 								.then(success => {
 									return when(user.save());
 								});
@@ -32,7 +32,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123+XYZ"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -53,7 +53,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"badusername",
-						"password":"abc123"
+						"password":"abc123+XYZ"
 					})
 					.expectStatus(400)
 					.end(function(err, res, body) {
@@ -91,7 +91,7 @@ module.exports = function(app, swagger) {
 					hippie(app, swagger)
 						.post('/api/signIn')
 						.send({
-							"password":"abc123"
+							"password":"abc123+XYZ"
 						})
 						.expectStatus(400)
 						.end(function(err, res, body) {
@@ -130,7 +130,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123+XYZ"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -161,7 +161,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123+XYZ"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -196,7 +196,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123+XYZ"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -228,7 +228,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123+XYZ"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {

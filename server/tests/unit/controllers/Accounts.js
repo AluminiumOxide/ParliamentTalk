@@ -622,6 +622,114 @@ describe("Account", function() {
  					assert.equal(res2.statusCode,400);
  				});
  		});
+		it("should not update with bad name", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'name':'tes'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setName')
+						.withArgs(data2.name)
+						.returns(false);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,500);
+						});
+				});
+		});
+		it("should not update with bad email", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'email':'testy1test.com'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setEmail')
+						.withArgs(data2.email)
+						.returns(false);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,500);
+						});
+				});
+		});
+		it("should update with bad password", () => {
+			var data1 = { 
+				'name':'testy',
+				'password':'passy'
+			};
+			var req1 = genReq(data1);
+			var res1 = genRes();
+			user = new User();
+			UserFindOneStub = ctx.stub(User,'findOne',function(){
+				return {exec: function(){return user;}}
+			});
+			UserMock.expects('matchPassword')
+				.withArgs(data1.password)
+				.returns(true);
+			UserMock.expects('generateLogin')
+				.returns('asdfasdf');
+			ctx.stub(User,'verifyLogin',function(args) { 
+				return user; 
+			});
+			return when(Authentication.signIn(req1, res1, genNext()))
+				.then(() => {
+					var data2 = {
+						'password':'passy1'
+					};
+					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
+					var res2 = genRes();
+					var userMock = ctx.mock(user);
+					userMock.expects('setPassword')
+						.withArgs(data2.password)
+					 	.returns(false);
+					return when(Account.updateAccount(req2, res2, genNext()))
+						.then(() => {
+							assert.equal(res2.statusCode,500);
+						});
+				});
+		});
 	});
 
 	/*** Delete ***/
@@ -771,6 +879,39 @@ describe("Account", function() {
 				});
 		});
 
+		it("should not approve a too short name", () => {
+			var req1 = genReq(JSON.stringify('abc'),{});
+			var res1 = genRes();
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a too long name", () => {
+			var req1 = genReq(JSON.stringify('abcdeABCDEabcdeABCDEabcdeF'),{});
+			var res1 = genRes();
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a name with a space", () => {
+			var req1 = genReq(JSON.stringify('abc def'),{});
+			var res1 = genRes();
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a name with a symbol", () => {
+			var req1 = genReq(JSON.stringify('abc&def'),{});
+			var res1 = genRes();
+			return when(Account.checkName(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
 	}); 
 	context(".checkEmail", function() {
 
@@ -818,6 +959,59 @@ describe("Account", function() {
 				});
 		});
 
+		it("should not approve an email without @", () => {
+			var req1 = genReq(JSON.stringify('testytest.com'),{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an email without .", () => {
+			var req1 = genReq(JSON.stringify('testy@testcom'),{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an email without the first part", () => {
+			var req1 = genReq(JSON.stringify('@test.com'),{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an email without the second part", () => {
+			var req1 = genReq(JSON.stringify('testy@.com'),{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an email without the third part", () => {
+			var req1 = genReq(JSON.stringify('testy@test.'),{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+
+		it("should not approve an email with a messed up third part", () => {
+			var req1 = genReq(JSON.stringify('testy@test.commmmmmmmmmmmmmm'),{});
+			var res1 = genRes();
+			return when(Account.checkEmail(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
 	}); 
 	context(".checkPassword", function() {
 
@@ -837,7 +1031,7 @@ describe("Account", function() {
 		});
 
 		it("should approve a potential password", () => {
-			var req1 = genReq(JSON.stringify('asdfasdfasdfasdf'),{});
+			var req1 = genReq(JSON.stringify('asdfasdfasdfASDF&1'),{});
 			var res1 = genRes();
 			UserMock.expects('count').returns(0);
 			return when(Account.checkPassword(req1, res1, genNext()))
@@ -853,7 +1047,54 @@ describe("Account", function() {
 					assert(!JSON.parse(res1.resData));
 				});
 		});
-
+		it("should not approve a too short password", () => {
+			var req1 = genReq(JSON.stringify('aBc1@3'),{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a too long password", () => {
+			var req1 = genReq(JSON.stringify('aB@01234567890123456789012345678901234567890'),{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a password without a lower case letter", () => {
+			var req1 = genReq(JSON.stringify('BADPASSWORD!1'),{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a password without an uppper case letter", () => {
+			var req1 = genReq(JSON.stringify('badpassword!1'),{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a password without a number", () => {
+			var req1 = genReq(JSON.stringify('BadPassword!!'),{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve a password without a symbol", () => {
+			var req1 = genReq(JSON.stringify('BadPassword123'),{});
+			var res1 = genRes();
+			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
 	});
 	context(".verifyEmail", function() {
 
@@ -1133,8 +1374,74 @@ describe("Account", function() {
 					});
 			});
 
-			it("should not verify account recovery, if bad password provided", () => {
+			it("should not verify account recovery, if bad password provided - empty password", () => {
 				var req = genReq({'email':'testy@test.com','code':'asdf','password':''},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+			
+			it("should not verify account recovery, if bad password provided - short password", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'aBc1@3'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});			
+
+			it("should not verify account recovery, if bad password provided - long password", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'aB@01234567890123456789012345678901234567890'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});			
+
+			it("should not verify account recovery, if bad password provided - missing upper case", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'badpassword1!'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});			
+
+			it("should not verify account recovery, if bad password provided - missing lower case", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'BADPASSWORD1!'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});			
+
+			it("should not verify account recovery, if bad password provided - missing number", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'BadPassword!@#'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
+				return when(Account.recoverDeleted(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});		
+	
+			it("should not verify account recovery, if bad password provided - missing symbol", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'BadPassword123'},{});
 				var res = genRes();
 				ctx.stub(User,'verifyAccountRecovery',function(){return false;});
 				return when(Account.recoverDeleted(req,res,genNext()))
@@ -1336,7 +1643,7 @@ describe("Account", function() {
 					});
 			});
 
-			it("should not verify password recovery, if bad password provided", () => {
+			it("should not verify password recovery, if bad password provided - empty", () => {
 				var req = genReq({'email':'testy@test.com','code':'asdf','password':''},{});
 				var res = genRes();
 				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
@@ -1345,7 +1652,73 @@ describe("Account", function() {
 						assert.equal(JSON.parse(res.resData),false);
 						assert.equal(res.statusCode,200);
 					});
-			});			
+			});		
+	
+			it("should not verify password recovery, if bad password provided - too short", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'aBc1@3'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});		
+	
+			it("should not verify password recovery, if bad password provided - too long", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'aB@01234567890123456789012345678901234567890'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});		
+	
+			it("should not verify password recovery, if bad password provided - missing lower case", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'BADPASSWORD1!'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});		
+	
+			it("should not verify password recovery, if bad password provided - missing upper case", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'badpassword1!'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+		
+			it("should not verify password recovery, if bad password provided - missing number", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'BadPassword!@#'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});		
+	
+			it("should not verify password recovery, if bad password provided - missing symbol", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'BadPassword123'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});		
 		});
 	});
 });

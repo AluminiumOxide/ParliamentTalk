@@ -25,7 +25,7 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy@test.com",
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123.ASDF"
 					})
 					.expectStatus(201)
 					.end(function(err, res, body) {
@@ -43,7 +43,7 @@ module.exports = function(app, swagger) {
 						.post('/api/account')
 						.send({
 							"name":"testy",
-							"password":"abc123"
+							"password":"abc123.ASDF"
 						})
 						.expectStatus(400)
 						.end(function(err, res, body) {
@@ -62,7 +62,7 @@ module.exports = function(app, swagger) {
 						.post('/api/account')
 						.send({
 							"email":"testy@test.com",
-							"password":"abc123"
+							"password":"abc123.ASDF"
 						})
 						.end(function(err, res, body) {
 							done();
@@ -98,7 +98,7 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy@test.com",
 						"name":"testy123",
-						"password":"abc123"
+						"password":"abc123.ASDF"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -115,7 +115,7 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@test.com",
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123.ASDF"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -126,6 +126,355 @@ module.exports = function(app, swagger) {
       						done();
 					});
 			});
+			it('should not create account with an empty user name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account')
+					.send({
+						"email":"testy123@testy.com",
+						"name":"",
+						"password":"abc123.ASDF"
+					})
+					.end(function(err, res, body) {
+						if (err) {
+							assert(true);
+						} else {
+							assert(false);
+						}
+      						done();
+					});
+			});
+			it('should not create account with a short user name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account')
+					.send({
+						"email":"testy123@testy.com",
+						"name":"abc",
+						"password":"abc123.ASDF"
+					})
+					.end(function(err, res, body) {
+						if (err) {
+							assert(true);
+						} else {
+							assert(false);
+						}
+      						done();
+					});
+			});
+			it('should not create account with a long user name', function(done) {
+				hippie(app, swagger)
+					.post('/api/account')
+					.send({
+						"email":"testy123@testy.com",
+						"name":"abcdeABCDEabcdeABCDEabcdeF",
+						"password":"abc123.ASDF"
+					})
+					.end(function(err, res, body) {
+						if (err) {
+							assert(true);
+						} else {
+							assert(false);
+						}
+      						done();
+					});
+			});
+			it('should not create account with a name with a space', function(done) {
+				hippie(app, swagger)
+					.post('/api/account')
+					.send({
+						"email":"testy123@testy.com",
+						"name":"abc def",
+						"password":"abc123.ASDF"
+					})
+					.end(function(err, res, body) {
+						if (err) {
+							assert(true);
+						} else {
+							assert(false);
+						}
+      						done();
+					});
+			});
+			it('should not create account with a name with a symbol', function(done) {
+				hippie(app, swagger)
+					.post('/api/account')
+					.send({
+						"email":"testy123@testy.com",
+						"name":"abc@def",
+						"password":"abc123.ASDF"
+					})
+					.end(function(err, res, body) {
+						if (err) {
+							assert(true);
+						} else {
+							assert(false);
+						}
+      						done();
+					});
+			});
+			it('should not create account with a email without @', function(done) {
+				try { 
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123testy.com",
+							"name":"abcdef",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a email without .', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testycom",
+							"name":"abcdef",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a email without the first part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"@testy.com",
+							"name":"abcdef",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a email without the second part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@.com",
+							"name":"abcdef",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a email without the third part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.",
+							"name":"abcdef",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a email with a messed up third part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.commmmmmmmmmmm",
+							"name":"abcdef",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a too short password', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"a1.A"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a too long password', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"aB@012345678901234567890123456788901234567890"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a password missing lower case letters', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"BADPASSWORD1!"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a password missing upper case letters', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"badpassword1!"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a password missing numbers', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"BadPassword!@#"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with a password missing symbols', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"BADPASSWORD123"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
 		});
 
 		describe('View Account', function() {
@@ -134,7 +483,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123.ASDF"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -165,7 +514,7 @@ module.exports = function(app, swagger) {
                     .post('/api/signIn')
                     .send({
                         "name":"testy",
-                        "password":"abc123"
+                        "password":"abc123.ASDF"
                     })
                     .expectStatus(200)
                     .end(function(err, res, body) {
@@ -200,7 +549,7 @@ module.exports = function(app, swagger) {
                     .post('/api/signIn')
                     .send({
                         "name":"testy",
-                        "password":"abc123"
+                        "password":"abc123.ASDF"
                     })
                     .expectStatus(200)
                     .end(function(err, res, body) {
@@ -232,7 +581,7 @@ module.exports = function(app, swagger) {
                     .post('/api/signIn')
                     .send({
                         "name":"testy",
-                        "password":"abc123"
+                        "password":"abc123.ASDF"
                     })
                     .expectStatus(200)
                     .end(function(err, res, body) {
@@ -280,7 +629,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy",
-						"password":"abc123"
+						"password":"abc123.ASDF"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -295,7 +644,7 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"qwerqwer"
+										"password":"qwerqwer.3QWER"
 									})
 									.expectStatus(200)
 									.end(function(err, res, body) {
@@ -319,7 +668,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -334,7 +683,7 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"qwerqwer"
+										"password":"qwerqwer.3QWER"
 									})
 									.expectStatus(400)
 									.end(function(err, res, body) {
@@ -355,7 +704,7 @@ module.exports = function(app, swagger) {
 						.send({
 							"name":"testy1",
 							"email":"testy1@test.com",
-							"password":"qwerqwer"
+							"password":"qwerqwer.3QWER"
 						})
 						.expectStatus(400)
 						.end(function(err, res, body) {
@@ -372,7 +721,699 @@ module.exports = function(app, swagger) {
 					done();
 				};
 			});
-// TODO: more tests here
+			it('should not update account with empty username', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"",
+										"email":"testy1@test.com",
+										"password":"qwerqwer.3QWER"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with short username', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"abc",
+										"email":"testy1@test.com",
+										"password":"qwerqwer.3QWER"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with long username', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"abcdeABCDEabcdeABCDEabcdeF",
+										"email":"testy1@test.com",
+										"password":"qwerqwer.3QWER"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with username with a space', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"abc def",
+										"email":"testy1@test.com",
+										"password":"qwerqwer.3QWER"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with username with a symbol', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"abc#def",
+										"email":"testy1@test.com",
+										"password":"qwerqwer.3QWER"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with email without @', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								try {
+									hippie(app, swagger)
+										.header('x-access-token',body.token)
+										.patch('/api/account')
+										.send({
+											"name":"abcdef",
+											"email":"testy1test.com",
+											"password":"qwerqwer.3QWER"
+										})
+										.expectStatus(500)
+										.end(function(err, res, body) {
+											if(err) {
+												assert(true);
+												return done();
+											} else {
+												assert(false);
+												return done();
+											}
+										});
+								} catch(e) {
+									assert(true);
+									return done();
+								}
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with email without .', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								try {
+									hippie(app, swagger)
+										.header('x-access-token',body.token)
+										.patch('/api/account')
+										.send({
+											"name":"abcdef",
+											"email":"testy1@testcom",
+											"password":"qwerqwer.3QWER"
+										})
+										.expectStatus(500)
+										.end(function(err, res, body) {
+											if(err) {
+												assert(true);
+												return done();
+											} else {
+												assert(false);
+												return done();
+											}
+										});
+								} catch(e) {
+									assert(true);
+									return done();
+								}
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with email without first part', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								try {
+									hippie(app, swagger)
+										.header('x-access-token',body.token)
+										.patch('/api/account')
+										.send({
+											"name":"abcdef",
+											"email":"@test.com",
+											"password":"qwerqwer.3QWER"
+										})
+										.expectStatus(500)
+										.end(function(err, res, body) {
+											if(err) {
+												assert(true);
+												return done();
+											} else {
+												assert(false);
+												return done();
+											}
+										});
+								} catch(e) {
+									assert(true);
+									return done();
+								}
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with email without second part', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								try {
+									hippie(app, swagger)
+										.header('x-access-token',body.token)
+										.patch('/api/account')
+										.send({
+											"name":"abcdef",
+											"email":"testy1@.com",
+											"password":"qwerqwer.3QWER"
+										})
+										.expectStatus(500)
+										.end(function(err, res, body) {
+											if(err) {
+												assert(true);
+												return done();
+											} else {
+												assert(false);
+												return done();
+											}
+										});
+								} catch(e) {
+									assert(true);
+									return done();
+								}
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with email without third part', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								try {
+									hippie(app, swagger)
+										.header('x-access-token',body.token)
+										.patch('/api/account')
+										.send({
+											"name":"abcdef",
+											"email":"testy1@test.",
+											"password":"qwerqwer.3QWER"
+										})
+										.expectStatus(500)
+										.end(function(err, res, body) {
+											if(err) {
+												assert(true);
+												return done();
+											} else {
+												assert(false);
+												return done();
+											}
+										});
+								} catch(e) {
+									assert(true);
+									return done();
+								}
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with email with messed up third part', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								try {
+									hippie(app, swagger)
+										.header('x-access-token',body.token)
+										.patch('/api/account')
+										.send({
+											"name":"abcdef",
+											"email":"testy1@test.commmmmmmmmmm",
+											"password":"qwerqwer.3QWER"
+										})
+										.expectStatus(500)
+										.end(function(err, res, body) {
+											if(err) {
+												assert(true);
+												return done();
+											} else {
+												assert(false);
+												return done();
+											}
+										});
+								} catch(e) {
+									assert(true);
+									return done();
+								}
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with too short password', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"testy1",
+										"email":"testy1@test.com",
+										"password":"aBc1@3"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with too long password', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"testy1",
+										"email":"testy1@test.com",
+										"password":"aB@01234567890123456789012345678901234567890"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with password missing lower case', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"testy1",
+										"email":"testy1@test.com",
+										"password":"BADPASSWORD1!"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with password missing upper case', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"testy1",
+										"email":"testy1@test.com",
+										"password":"badpassword1!"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with password missing number', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"testy1",
+										"email":"testy1@test.com",
+										"password":"badpassword!!!"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with password missing symbol', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"name":"testy1",
+										"email":"testy1@test.com",
+										"password":"BadPassword123"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
 		});
 
 		describe('Check Name', function() {
@@ -418,6 +1459,81 @@ module.exports = function(app, swagger) {
 								return done();
 							} else {
 								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a short name', function(done) {
+					hippie(app, swagger)
+						.post('/api/account/check/name')
+						.send("abc")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+			});
+			it('should not approve a long name', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/name')
+						.send("abcdeABCDEabcdeABCDEabcdeF")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a name with a space', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/name')
+						.send("abc def")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a name with a symbol', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/name')
+						.send("abc*defg")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
 								return done();
 							}
 						});
@@ -478,12 +1594,132 @@ module.exports = function(app, swagger) {
 					return done();
 				}
 			});
+			it('should not approve an email without @', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("testytest.com")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve an email without .', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("testy@testcom")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve an email without first part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("@test.com")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve an email without second part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("testy@.com")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve an email without third part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("testy@test.")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!res.body);
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve an email with messed up third part', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/email')
+						.send("testy@test.commmmmmmmm")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
 		});
 		describe('Check Password', function() {
 			it('should approve a potential password', function(done) {
 				hippie(app, swagger)
 					.post('/api/account/check/password')
-					.send("testy123")
+					.send("Testy+123")
 					.expectStatus(200)
 					.end(function(err, res, body) {
 						if(err) {
@@ -506,7 +1742,127 @@ module.exports = function(app, swagger) {
 								assert(false);
 								return done();
 							} else {
-								assert(!res.body);
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a short password', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("aBc1@3")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a long password', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("aB@0123456678901234567890123456789012345678901234567890")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a password without lower case letter', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("BADPASSWORD1!")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a password without upper case letter', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("badpassword1!")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a password without number', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("BadPassword!!!")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
+								return done();
+							}
+						});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a password without symbol', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account/check/password')
+						.send("BadPassword123")
+						.expectStatus(200)
+						.end(function(err, res, body) {
+							if(err) {
+								assert(false);
+								return done();
+							} else {
+								assert(!JSON.parse(res.body));
 								return done();
 							}
 						});
@@ -523,7 +1879,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -547,7 +1903,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -585,7 +1941,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -626,7 +1982,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -654,7 +2010,7 @@ module.exports = function(app, swagger) {
 									.post('/api/signIn')
 									.send({
 										"name":"testy1",
-										"password":"qwerqwer"
+										"password":"qwerqwer.3QWER"
 									})
 									.expectStatus(200)
 									.end(function(err, res, body) {
@@ -792,7 +2148,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -842,7 +2198,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(200)
 					.end(function(err, res, body) {
@@ -877,7 +2233,7 @@ module.exports = function(app, swagger) {
 					.post('/api/signIn')
 					.send({
 						"name":"testy1",
-						"password":"qwerqwer"
+						"password":"qwerqwer.3QWER"
 					})
 					.expectStatus(400)
 					.end(function(err, res, body) {
@@ -953,7 +2309,7 @@ module.exports = function(app, swagger) {
 							.post('/api/account/recover/deleted')
 							.send({
 								"code": user.recovery.code,
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -976,7 +2332,7 @@ module.exports = function(app, swagger) {
 							.send({
 								"email":'bademail@bad.com',
 								"code":user.recovery.code,
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -998,7 +2354,7 @@ module.exports = function(app, swagger) {
 							.post('/api/account/recover/deleted')
 							.send({
 								"email":user.email,
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1021,7 +2377,7 @@ module.exports = function(app, swagger) {
 							.send({
 								"email":user.email,
 								"code":"badcode",
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1058,7 +2414,7 @@ module.exports = function(app, swagger) {
 							});
 					});
 			});
-			it('should not validate recovery with bad password', function(done) {
+			it('should not validate recovery with bad password - too short', function(done) {
 				when(User.findOne({"name":"testy1"}).exec())
 					.then(user => {
 						hippie(app, swagger)
@@ -1066,7 +2422,121 @@ module.exports = function(app, swagger) {
 							.send({
 								"email":user.email,
 								"code":user.recovery.code,
-								"password":""
+								"password":"aBc1@3"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();	
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - too long', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/deleted')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"aB!1234567890123456789012345678901234567890"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - no upper case', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/deleted')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"badpassword1!"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - no lower case', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/deleted')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"BADPASSWORD1!"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - no number', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/deleted')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"BadPassword!!!"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - no symbol', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/deleted')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"BadPassword123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1088,7 +2558,7 @@ module.exports = function(app, swagger) {
 							.post('/api/account/recover/deleted')
 							.send({
 								"email":user.email,
-								"password":"newpass123",
+								"password":"newpassY+123",
 								"code":user.recovery.code
 							})
 							.expectStatus(200)
@@ -1188,7 +2658,7 @@ module.exports = function(app, swagger) {
 							.post('/api/account/recover/password')
 							.send({
 								"code": user.recovery.code,
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1211,7 +2681,7 @@ module.exports = function(app, swagger) {
 							.send({
 								"email":'bademail@bad.com',
 								"code":user.recovery.code,
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1233,7 +2703,7 @@ module.exports = function(app, swagger) {
 							.post('/api/account/recover/password')
 							.send({
 								"email":user.email,
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1256,7 +2726,7 @@ module.exports = function(app, swagger) {
 							.send({
 								"email":user.email,
 								"code":"badcode",
-								"password":"newpass123"
+								"password":"newpassY+123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1293,7 +2763,7 @@ module.exports = function(app, swagger) {
 							});
 					});
 			});
-			it('should not validate recovery with bad password', function(done) {
+			it('should not validate recovery with bad password - too short', function(done) {
 				when(User.findOne({"name":"testy1"}).exec())
 					.then(user => {
 						hippie(app, swagger)
@@ -1301,7 +2771,122 @@ module.exports = function(app, swagger) {
 							.send({
 								"email":user.email,
 								"code":user.recovery.code,
-								"password":""
+								"password":"aBc1@3"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - too long', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"aB@1234567890123456789012345678901234567890"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - missing lower case', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"BADPASSWORD1!"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - missing upper case', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"badpassword1!"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - missing number', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"BadPassword!!!"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password - missing symbol', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":"BadPassword123"
 							})
 							.expectStatus(200)
 							.end(function(err, res, body) {
@@ -1323,7 +2908,7 @@ module.exports = function(app, swagger) {
 							.post('/api/account/recover/password')
 							.send({
 								"email":user.email,
-								"password":"newpass123",
+								"password":"newpassY+123",
 								"code":user.recovery.code
 							})
 							.expectStatus(200)

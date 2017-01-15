@@ -150,7 +150,9 @@ User.methods.setName = function(name) {
  * @returns {boolean} Whether or not the name is valid
  */
 User.statics.checkName = function(name) {
-	if(name) {
+	// contains only letters and numbers
+	var regex = /^[a-z0-9]+$/i;
+	if(!!name && name.length > 4 && name.length < 26 && regex.test(name)) {
 		return when(User.count({'name':name}))
 			.then(count => {
 				if(count === 0) {
@@ -196,7 +198,9 @@ User.methods.setEmail = function(email) {
  * @returns {boolean} Whether or not the email is unique
  */
 User.statics.checkEmail = function(email) {
-	if(email) {
+	// fits the <blah>@<blah>.<blah> pattern
+	var regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+	if(!!email && regex.test(email)) {
 		return User.count({'email':email})
 			.then(count => {
 				if(count === 0) {
@@ -237,7 +241,9 @@ User.methods.setPassword = function(password) {
  * @returns {boolean} Whether or not the password is valid
  */
 User.statics.checkPassword = function(password) {
-	if(password) {
+	// has at least: 1 lower case, 1 uppper case, 1 digit, 1 symbol
+	var regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[-+_!@#$%^&*.,?]).+$/;
+	if(!!password && password.length > 7 && password.length < 40 && regex.test(password)) {
 		return true;
 	}
 	return false;
@@ -398,11 +404,17 @@ User.statics.verifyAccountRecovery = function(email,code,password) {
 			.then(user => {
 				if(!!user && user.recovery.code === code) {
 					return when(user.setPassword(password))
-						.then(() => {
-							user.deleted = false;
-							user.recovery.field = null;
-							user.recovery.code = '';
-							return when(user.save());
+						.then(updated => {
+							if(updated) {
+								user.deleted = false;
+								user.recovery.field = null;
+								user.recovery.code = '';
+								return when(user.save());
+							} else {
+								return when(false);
+							}
+						}).otherwise(err => {
+							return when(false);
 						});
 				} else {
 					return when(false);
@@ -444,10 +456,14 @@ User.statics.verifyPasswordRecovery = function(email,code,password) {
 			.then(user => {
 				if(!!user && user.recovery.code === code) {
 					return when(user.setPassword(password))
-						.then(() => {
-							user.recovery.field = '';
-							user.recovery.code = '';
-							return when(user.save());
+						.then(updated => {
+							if(updated) {
+								user.recovery.field = '';
+								user.recovery.code = '';
+								return when(user.save());
+							} else {
+								return when(false);
+							}
 						});
 				} else {
 					return when(false);

@@ -67,9 +67,9 @@ describe("User", function() {
 		it("should pass good name", () => {
 			UserMock
 				.expects('count')
-				.withArgs({'name':'testy'})
+				.withArgs({'name':'testy99'})
 				.returns(when(0));
-			return when(User.checkName('testy'))
+			return when(User.checkName('testy99'))
 				.then(valid => {
 					assert.equal(valid,true);
 				});
@@ -88,6 +88,56 @@ describe("User", function() {
 				.withArgs({'name':'testy'})
 				.returns(when(1));
 			return when(User.checkName('testy'))
+				.then(valid => {
+					assert.equal(valid, false);
+				});
+		});
+
+		it("should fail too short name", () => {
+			return when(User.checkName('abc'))
+				.then(valid => {
+					assert.equal(valid, false);
+				});
+		});
+
+		it("should fail too long name", () => {
+			return when(User.checkName('abcdeABCDE12345ABCDEabcdef'))
+				.then(valid => {
+					assert.equal(valid, false);
+				});
+		});
+
+		it("should pass only letters name", () => {
+			UserMock
+				.expects('count')
+				.withArgs({'name':'abcdeabcde'})
+				.returns(when(0));
+			return when(User.checkName('abcdeabcde'))
+				.then(valid => {
+					assert.equal(valid, true);
+				});
+		});
+
+		it("should pass only numbers name", () => {
+			UserMock
+				.expects('count')
+				.withArgs({'name':'12345'})
+				.returns(when(0));
+			return when(User.checkName('12345'))
+				.then(valid => {
+					assert.equal(valid, true);
+				});
+		});
+
+		it("should fail name with space", () => {
+			return when(User.checkName('abc de'))
+				.then(valid => {
+					assert.equal(valid, false);
+				});
+		});
+
+		it("should fail name with symbol", () => {
+			return when(User.checkName('abcde@'))
 				.then(valid => {
 					assert.equal(valid, false);
 				});
@@ -146,6 +196,42 @@ describe("User", function() {
 				});
 		});
 
+		it("should not set short name", () => {
+			user.name = 'shouldBe';
+			return when(user.setName('abc'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.name,'shouldBe');
+				});
+		});
+
+		it("should not set short name", () => {
+			user.name = 'shouldBe';
+			return when(user.setName('abcdeABCDEabcdeABCDEabcdeF'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.name,'shouldBe');
+				});
+		});
+
+		it("should not set name with space", () => {
+			user.name = 'shouldBe';
+			return when(user.setName('abc def'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.name,'shouldBe');
+				});
+		});
+
+		it("should not set name with symbol", () => {
+			user.name = 'shouldBe';
+			return when(user.setName('abc&def'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.name,'shouldBe');
+				});
+		});
+
 	});
 	
 	/*** Check Email ***/
@@ -191,6 +277,48 @@ describe("User", function() {
 			return when(User.checkEmail('testy@test.com'))
 				.then(valid => {
 					assert.equal(valid, false);
+				});
+		});
+
+		it("should fail an email without an @", () => {
+			return when(User.checkEmail('testytest.com'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+		
+		it("should fail an email without an .", () => {
+			return when(User.checkEmail('testy@testcom'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail an email without the first part", () => {
+			return when(User.checkEmail('@test.com'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail an email without the second part", () => {
+			return when(User.checkEmail('testy@.com'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail an email without the third part", () => {
+			return when(User.checkEmail('testy@test.'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail an email with a messed up thid part", () => {
+			return when(User.checkEmail('testytest.commmmmmm'))
+				.then(valid => {
+					assert.equal(valid,false);
 				});
 		});
 
@@ -263,6 +391,60 @@ describe("User", function() {
 				});
 		});
 
+		it("should not set email without @", () => {
+			user.email = "should@be.com";
+			return when(user.setEmail('testytest.com'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.email, 'should@be.com');
+				});
+		});
+
+		it("should not set empty email without .", () => {
+			user.email = "should@be.com";
+			return when(user.setEmail('testy@testcom'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.email, 'should@be.com');
+				});
+		});
+
+		it("should not set email without first part", () => {
+			user.email = "should@be.com";
+			return when(user.setEmail('@test.com'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.email, 'should@be.com');
+				});
+		});
+
+		it("should not set email without second part", () => {
+			user.email = "should@be.com";
+			return when(user.setEmail('testy@.com'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.email, 'should@be.com');
+				});
+		});
+
+		it("should not set email without third part", () => {
+			user.email = "should@be.com";
+			return when(user.setEmail('testy@test.'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.email, 'should@be.com');
+				});
+		});
+
+		it("should not set email with messed up third part", () => {
+			user.email = "should@be.com";
+			return when(user.setEmail('testy@test.commmmmmmmm'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.email, 'should@be.com');
+				});
+		});
+
 	});
 
 	/*** Check Password ***/
@@ -283,7 +465,7 @@ describe("User", function() {
 		});
 
 		it("should pass good password", () => {
-			return when(User.checkPassword('passy'))
+			return when(User.checkPassword('paasSy1+'))
 				.then(valid => {
 					assert.equal(valid,true);
 				});
@@ -295,6 +477,49 @@ describe("User", function() {
 					assert.equal(valid,false);
 				});
 		});
+
+		it("should fail too short password", () => {
+			return when(User.checkPassword('abcdE+1'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail too long password", () => {
+			return when(User.checkPassword('aA&34567890123456789012345678901234567890'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail password without at least 1 lower case letter", () => {
+			return when(User.checkPassword('BADPASSWORD1&'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail password without at least 1 upper case letter", () => {
+			return when(User.checkPassword('badpassword2&'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail password without at least 1 number", () => {
+			return when(User.checkPassword('badPassword&*'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
+		it("should fail password without at least 1 symbol", () => {
+			return when(User.checkPassword('badPassword2345'))
+				.then(valid => {
+					assert.equal(valid,false);
+				});
+		});
+
 	});
 
 	/*** Set Password ***/
@@ -315,13 +540,13 @@ describe("User", function() {
 		});
 
 		it("should set good password", () => {
-			return when(user.setPassword('passy'))
+			return when(user.setPassword('paassY&1'))
 				.then(valid => {
 					assert.equal(valid,true);
 					assert(user.password);
 					assert(user.password.salt);
 					assert(user.password.encrypted);
-					assert.equal(user.password.encrypted,bcrypt.hashSync('passy',user.password.salt));
+					assert.equal(user.password.encrypted,bcrypt.hashSync('paassY&1',user.password.salt));
 				});
 		});
 
@@ -330,6 +555,78 @@ describe("User", function() {
 			user.password.salt = 'asdf';
 			user.password.encrypted = 'qwer';
 			return when(user.setPassword(''))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.password.salt,'asdf');
+					assert.equal(user.password.encrypted,'qwer');
+				});
+		});
+
+		it("should fail too short password", () => {
+			user.password = {};
+			user.password.salt = 'asdf';
+			user.password.encrypted = 'qwer';
+			return when(user.setPassword('abcdefg'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.password.salt,'asdf');
+					assert.equal(user.password.encrypted,'qwer');
+				});
+		});
+
+		it("should fail too long password", () => {
+			user.password = {};
+			user.password.salt = 'asdf';
+			user.password.encrypted = 'qwer';
+			return when(user.setPassword('aA&012345690123457890123456789012345678901234567890'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.password.salt,'asdf');
+					assert.equal(user.password.encrypted,'qwer');
+				});
+		});
+
+		it("should fail password without at least 1 lower case letter", () => {
+			user.password = {};
+			user.password.salt = 'asdf';
+			user.password.encrypted = 'qwer';
+			return when(user.setPassword('BADPASSWORD!1'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.password.salt,'asdf');
+					assert.equal(user.password.encrypted,'qwer');
+				});
+		});
+
+		it("should fail password without at least 1 upper case letter", () => {
+			user.password = {};
+			user.password.salt = 'asdf';
+			user.password.encrypted = 'qwer';
+			return when(user.setPassword('badpassword!1'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.password.salt,'asdf');
+					assert.equal(user.password.encrypted,'qwer');
+				});
+		});
+
+		it("should fail password without at least 1 number", () => {
+			user.password = {};
+			user.password.salt = 'asdf';
+			user.password.encrypted = 'qwer';
+			return when(user.setPassword('badPassword!'))
+				.then(valid => {
+					assert.equal(valid,false);
+					assert.equal(user.password.salt,'asdf');
+					assert.equal(user.password.encrypted,'qwer');
+				});
+		});
+
+		it("should fail password without at least 1 symbol", () => {
+			user.password = {};
+			user.password.salt = 'asdf';
+			user.password.encrypted = 'qwer';
+			return when(user.setPassword('badPassword1'))
 				.then(valid => {
 					assert.equal(valid,false);
 					assert.equal(user.password.salt,'asdf');
@@ -379,9 +676,9 @@ describe("User", function() {
 
 		it("should match password", () => {
 			user = new User();
-			return when(user.setPassword('passy'))
+			return when(user.setPassword('paaassY&1'))
 				.then(valid => {
-					return when(user.matchPassword('passy'))
+					return when(user.matchPassword('paaassY&1'))
 						.then(matches => {
 							assert.equal(matches,true);
 						});
@@ -389,7 +686,7 @@ describe("User", function() {
 		});
 
 		it("should not match password", () => {
-			return when(user.setPassword('passy'))
+			return when(user.setPassword('paaassY&1'))
 				.then(valid => {
 					return when(user.matchPassword('notPassy'))
 						.then(matches => {
@@ -788,18 +1085,18 @@ describe("User", function() {
 			user.setDeleted();
 			return when(User.generateAccountRecovery(user.email))
 				.then(() => {
-					return when(User.verifyAccountRecovery(user.email,user.recovery.code,'test12345'))
+					return when(User.verifyAccountRecovery(user.email,user.recovery.code,'Test+12345'))
 						.then(() => {
 							assert.equal(user.deleted, false);
 							assert.equal(user.recovery.field, null);
 							assert.equal(user.recovery.code, '');
-							assert(user.matchPassword('test12345'));
+							assert(user.matchPassword('Test+12345'));
 						});
 				});
 		});
 
 		it('should not verify account which is not deleted', () => {
-			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'test12345'))
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -807,7 +1104,7 @@ describe("User", function() {
 
 		it('should not verify account with no email', () => {
 			user.setDeleted();
-			return when(User.verifyAccountRecovery('',user.recovery.code,'test12345'))
+			return when(User.verifyAccountRecovery('',user.recovery.code,'Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -815,7 +1112,7 @@ describe("User", function() {
 
 		it('should not verify account with bad email', () => {
 			user.setDeleted();
-			return when(User.verifyAccountRecovery('bad.email@test.com',user.recovery.code,'test12345'))
+			return when(User.verifyAccountRecovery('bad.email@test.com',user.recovery.code,'Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -823,7 +1120,7 @@ describe("User", function() {
 
 		it('should not verify account with no code', () => {
 			user.setDeleted();
-			return when(User.verifyAccountRecovery(user.email,'','test12345'))
+			return when(User.verifyAccountRecovery(user.email,'','Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -831,7 +1128,7 @@ describe("User", function() {
 
 		it('should not verify account with bad code', () => {
 			user.setDeleted();
-			return when(User.verifyAccountRecovery(user.email,'badcode','test12345'))
+			return when(User.verifyAccountRecovery(user.email,'badcode','Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -845,9 +1142,49 @@ describe("User", function() {
 				});
 		});
 
-		it('should not verify account with bad password', () => {
+		it('should not verify account with bad password - too short', () => {
 			user.setDeleted();
-			return when(User.verifyAccountRecovery(user.email,user.recovery.code,''))
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'aBc1@3'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad password - too long', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'aB@01234567890123456789012345678901234567890'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad password - missing upper case letter', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'badpassword1@'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad password - missing lower case letter', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'BADPASSWORD1@'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad password - missing number', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'BadPassword!@'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account with bad password - missing symbol', () => {
+			user.setDeleted();
+			return when(User.verifyAccountRecovery(user.email,user.recovery.code,'BadPassword123'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -936,38 +1273,38 @@ describe("User", function() {
 		it('should verify and recover account password', () => {
 			return when(User.generatePasswordRecovery(user.email))
 				.then(() => {
-					return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'test12345'))
+					return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'Test+12345'))
 						.then(() => {
 							assert.equal(user.recovery.field, '');
 							assert.equal(user.recovery.code, '');
-							assert(user.matchPassword('test12345'));
+							assert(user.matchPassword('Test+12345'));
 						});
 				});
 		});
 
 		it('should not verify account password with no email', () => {
-			return when(User.verifyPasswordRecovery('',user.recovery.code,'test12345'))
+			return when(User.verifyPasswordRecovery('',user.recovery.code,'Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
 		});
 
 		it('should not verify account password with bad email', () => {
-			return when(User.verifyPasswordRecovery('bad.email@test.com',user.recovery.code,'test12345'))
+			return when(User.verifyPasswordRecovery('bad.email@test.com',user.recovery.code,'Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
 		});
 
 		it('should not verify account password with no code', () => {
-			return when(User.verifyPasswordRecovery(user.email,'','test12345'))
+			return when(User.verifyPasswordRecovery(user.email,'','Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
 		});
 
 		it('should not verify account password with bad code', () => {
-			return when(User.verifyPasswordRecovery(user.email,'badcode','test12345'))
+			return when(User.verifyPasswordRecovery(user.email,'badcode','Test+12345'))
 				.then(r => {
 					assert.equal(r, false);
 				});
@@ -980,8 +1317,43 @@ describe("User", function() {
 				});
 		});
 
-		it('should not verify account password with bad password', () => {
-			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,''))
+		it('should not verify account password with bad password - too short', () => {
+			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'aBc1@3'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account password with bad password - too long', () => {
+			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'aB@01234567890123456789012345678901234567890'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account password with bad password - missing lower case letter', () => {
+			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'BADPASSWORD1!'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account password with bad password - missing uppper case letter', () => {
+			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'badpassword1!'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account password with bad password - missing number', () => {
+			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'BadPassword!'))
+				.then(r => {
+					assert.equal(r, false);
+				});
+		});
+
+		it('should not verify account password with bad password - missing symbol', () => {
+			return when(User.verifyPasswordRecovery(user.email,user.recovery.code,'BadPassword123'))
 				.then(r => {
 					assert.equal(r, false);
 				});
