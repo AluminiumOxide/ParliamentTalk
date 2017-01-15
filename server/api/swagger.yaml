@@ -167,7 +167,7 @@ paths:
         description: "The user's email"
         required: true
         schema:
-          $ref: "#/definitions/email"
+          $ref: "#/definitions/recoveryObject"
       responses:
         200:
           description: "boolean success response"

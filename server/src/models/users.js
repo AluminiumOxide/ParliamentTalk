@@ -413,6 +413,50 @@ User.statics.verifyAccountRecovery = function(email,code,password) {
 	}
 };
 
+/**
+ * Generates an account password recovery code
+ * @function generatePasswordRecovery
+ */
+User.statics.generatePasswordRecovery = function(email) {
+	if(!!email) {
+		return when(User.findOne({email:email}).exec())
+			.then(user => {
+				if(!!user) {
+					user.recovery.field = 'password';
+					user.recovery.code = bcrypt.genSaltSync(10);
+					return when(user.save());
+				} else {
+					return when(false);
+				}
+			});
+	} else {
+		return when(false);
+	}
+};
+
+/**
+ * Verifies an account password recovery code
+ * @function verifyPasswordRecovery
+ */
+User.statics.verifyPasswordRecovery = function(email,code,password) {
+	if(!!email && !!code && !!password) {
+		return when(User.findOne({email:email}).exec())
+			.then(user => {
+				if(!!user && user.recovery.code === code) {
+					return when(user.setPassword(password))
+						.then(() => {
+							user.recovery.field = '';
+							user.recovery.code = '';
+							return when(user.save());
+						});
+				} else {
+					return when(false);
+				}
+			});
+	} else {
+		return when(false);
+	}
+};
 
 // Create a model from the schema
 User = mongoose.model('User', User);

@@ -421,6 +421,61 @@ exports.recoverUsername = function(req, res, next) {
 }
 
 /**
+ * Recover Account Password
+ * 
+ */
+exports.recoverPassword = function(req, res, next) {
+	if(!!req.body.email && !!req.body.code && !!req.body.password) {
+		return when(User.verifyPasswordRecovery(req.body.email,req.body.code,req.body.password))
+			.then(verified => {
+				if(verified) {
+					res.statusCode = 200;
+					res.end(JSON.stringify(true));
+					return next();
+				} else {
+					res.statusCode = 200;
+					res.end(JSON.stringify(false));
+					return next();
+				}
+			}).otherwise(err => {
+				res.statusCode = 500;
+				res.end(JSON.stringify(false));
+				return next();
+			});	
+	} else {
+		if(!!req.body.email && !!!req.body.code && !!!req.body.password) {
+			return when(User.generatePasswordRecovery(req.body.email))
+				.then(generated => {
+					if(generated) {
+						return when(emailer.sendEmail('passwordRecovery',generated._id))
+							.then(() => {
+								res.statusCode = 200;
+								res.end(JSON.stringify(true));
+								return next();
+							}).otherwise(err => {
+								res.statusCode = 500;
+								res.end(JSON.stringify(false));
+								return next();
+							});
+					} else {
+						res.statusCode = 200;
+						res.end(JSON.stringify(false));
+						return next();
+					}
+				}).otherwise(err => {
+					res.statusCode = 500;
+					res.end(JSON.stringify(false));
+					return next();
+				});
+			} else {
+				res.statusCode = 200;
+				res.end(JSON.stringify(false));
+				return next();
+			}
+		}
+}
+
+/**
  * Verify login
  * Helper function to check the user's request header is OK
  * @param  {http.request} req - The request object

@@ -1125,6 +1125,222 @@ module.exports = function(app, swagger) {
 					});
 			});
 		});
+
+		describe('Recover Account Password', () => {
+			it('should not generate recovery with no email', () => {
+				hippie(app, swagger)
+					.post('/api/account/recover/password')
+					.send({})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert.equal(res.body,'false');
+							return done();
+
+						}
+					});
+			});
+			it('should not generate recovery with bad email', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/recover/password')
+					.send({
+						"email":'bademail@bad.com'
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert.equal(res.body,'false');
+							return done();
+			
+						}
+					});
+			});
+			it('should recover an account - part 1', function(done) {
+				when(User.findOne({'name':'testy1'}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'true');
+									return done();
+								}
+							});
+					});
+			});
+			it('should not verify recovery with no email', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"code": user.recovery.code,
+								"password":"newpass123"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad email', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":'bademail@bad.com',
+								"code":user.recovery.code,
+								"password":"newpass123"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with no code', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"password":"newpass123"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+		
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad code', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":"badcode",
+								"password":"newpass123"
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with no password', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should not validate recovery with bad password', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app, swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"code":user.recovery.code,
+								"password":""
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert.equal(res.body,'false');
+									return done();
+					
+								}
+							});
+					});
+			});
+			it('should recover an account - part 2', function(done) {
+				when(User.findOne({"name":"testy1"}).exec())
+					.then(user => {
+						hippie(app,swagger)
+							.post('/api/account/recover/password')
+							.send({
+								"email":user.email,
+								"password":"newpass123",
+								"code":user.recovery.code
+							})
+							.expectStatus(200)
+							.end(function(err, res, body) {
+								if(err) {
+									assert(false);
+									return done();
+								} else {
+									assert(res.body,'true');
+									return done();
+								}
+							});
+					});
+			});
+		});
+
+
 		describe('Recover forgotten username', () => {
 			it('should send username via email', function(done) {
 				when(User.findOne({'name':'testy1'}).exec())

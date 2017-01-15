@@ -1201,4 +1201,151 @@ describe("Account", function() {
 				});
 		}); 
 	});
+
+	describe('.recoverPassword', () => {
+
+		describe('1st Request', () => {
+
+			var ctx = '';
+			var user = '';
+			var UserMock = null;
+			var UserFindOneStub = null;
+	
+			beforeEach(function() {
+				ctx = sinon.sandbox.create();
+				ctx.stub(User.prototype,'save',function(next) {return next();});
+				user = new User();
+				UserMock = ctx.mock(User);
+			});
+	
+			afterEach(function() {
+				ctx.restore();
+			});
+
+			it("should generate password recovery", () => {
+				var req = genReq({'email':'testy@test.com'},{});
+				var res = genRes();
+				ctx.stub(User,'generatePasswordRecovery',function(){return true;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),true);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not generate password recovery, if no email provided", () => {
+				var req = genReq({},{});
+				var res = genRes();
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not generate password recovery, if bad email provided", () => {
+				var req = genReq({'email':'testy@test.com'},{});
+				var res = genRes();
+				ctx.stub(User,'generatePasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+		});
+
+		describe('2nd Request', () => {
+
+			var ctx = '';
+			var user = '';
+			var UserMock = null;
+			var UserFindOneStub = null;
+	
+			beforeEach(function() {
+				ctx = sinon.sandbox.create();
+				ctx.stub(User.prototype,'save',function(next) {return next();});
+				user = new User();
+				UserMock = ctx.mock(User);
+			});
+	
+			afterEach(function() {
+				ctx.restore();
+			});
+
+			it("should verify password recovery", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':'asdf'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return true;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),true);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify password recovery, if no email provided", () => {
+				var req = genReq({'code':'asdf','password':'asdf'},{});
+				var res = genRes();
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify password recovery, if bad email provided", () => {
+				var req = genReq({'email':'bad@email.com','code':'asdf','password':'asdf'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify password recovery, if no code provided", () => {
+				var req = genReq({'email':'testy@test.com','password':'asdf'},{});
+				var res = genRes();
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify password recovery, if bad code provided", () => {
+				var req = genReq({'email':'bad@email.com','code':'badcode','password':'asdf'},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify password recovery, if no password provided", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf'},{});
+				var res = genRes();
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});
+
+			it("should not verify password recovery, if bad password provided", () => {
+				var req = genReq({'email':'testy@test.com','code':'asdf','password':''},{});
+				var res = genRes();
+				ctx.stub(User,'verifyPasswordRecovery',function(){return false;});
+				return when(Account.recoverPassword(req,res,genNext()))
+					.then(() => {
+						assert.equal(JSON.parse(res.resData),false);
+						assert.equal(res.statusCode,200);
+					});
+			});			
+		});
+	});
 });
