@@ -11,6 +11,7 @@ module.exports = function(env) {
 	var fs = require('fs');
 	var serverPort = 8080;
 	var when = require('when');
+	var i18n = require('./lib/i18n');
 	
 	/*** Files ***/
 	require('./models/users');
@@ -59,7 +60,10 @@ module.exports = function(env) {
     
      	 			// Serve the Swagger documents and Swagger UI
      	 			app.use(middleware.swaggerUi());
-    
+
+					// Load the internationalization
+					app.use(i18n.getInit());
+
      	 			// Start the server
      	 			when(http.createServer(app).listen(serverPort))
 					.then(() => {
