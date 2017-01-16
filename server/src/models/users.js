@@ -3,6 +3,7 @@ var jwt = require('jsonwebtoken');
 var when = require('when');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
+var i18n = require('../lib/i18n');
 
 /**
  * @class
@@ -32,6 +33,13 @@ var User = new mongoose.Schema({
 		salt: String,
 		encrypted: String
 	},
+
+	/**
+	 * The user's preferred language
+	 * @type string
+	 * @memberOf User
+	 */
+	lang: String,
 
 	/** 
 	 * When the user was created
@@ -244,6 +252,37 @@ User.statics.checkPassword = function(password) {
 	// has at least: 1 lower case, 1 uppper case, 1 digit, 1 symbol
 	var regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[-+_!@#$%^&*.,?]).+$/;
 	if(!!password && password.length > 7 && password.length < 40 && regex.test(password)) {
+		return true;
+	}
+	return false;
+};
+
+/**
+ * Sets the user's preferred language
+ * @function setLanguage
+ * @memberof User#
+ * @name setLanguage
+ * @param {string} lang - The new language
+ * @returns {boolean} Whether the language was set
+ */
+User.methods.setLanguage = function(lang) {
+	if(User.checkLanguage(lang)) {
+		this.lang = lang;
+		return true;
+	}
+	return false;
+};
+
+/**
+ * Checks that a potential language is supported
+ * @function checkLanguage
+ * @memberof User#
+ * @name checkLanguage
+ * @param {string} lang - The potential language
+ * @returns {boolean} Whether the language is supported
+ */
+User.statics.checkLanguage = function(lang) {
+	if(!!lang && i18n.getLocales().indexOf(lang) >= 0) {
 		return true;
 	}
 	return false;

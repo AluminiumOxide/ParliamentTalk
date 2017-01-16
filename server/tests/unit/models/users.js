@@ -635,6 +635,62 @@ describe("User", function() {
 		});
 	});
 
+	/*** Set Language ***/
+	context("#setLanguage", function() {
+
+		var ctx = null;
+		var user = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+			user = new User();
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should set the user's preferred language", () => {
+			assert(user.setLanguage('en'));
+		});
+
+		it("should not set bad language - empty", () => {
+			assert(!user.setLanguage(''));
+		});
+
+		it("should not set bad language - unsupported", () => {
+			assert(!user.setLanguage('badlang'));
+		});
+
+	});
+
+	/*** Check Language ***/
+	context("#checkLanguage", function() {
+
+		var ctx = null;
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should approve language", () => {
+			assert(User.checkLanguage('en'));
+		});
+
+		it("should not approve empty language", () => {
+			assert(!User.checkLanguage(''));
+		});
+
+		it("should not approve unsupported language", () => {
+			assert(!User.checkLanguage('badlanguagecode'));
+		});
+
+	});
+
 	/*** Set Deleted ***/
 	context("#setDeleted", function() {
 

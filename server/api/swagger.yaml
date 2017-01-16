@@ -316,6 +316,32 @@ paths:
             $ref: "#/definitions/errorModel"
       x-swagger-router-controller: "Accounts"
     x-swagger-router-controller: "accounts"
+  /account/check/language:
+    post:
+      tags:
+      - "accounts"
+      description: "Checks if a user language would be valid"
+      operationId: "checkLanguage"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "language"
+        description: "The proposed language"
+        required: true
+        schema:
+          $ref: "#/definitions/language"
+      responses:
+        200:
+          description: "boolean response"
+          schema:
+            $ref: "#/definitions/yesNo"
+        default:
+          description: "verify error"
+          schema:
+            $ref: "#/definitions/errorModel"
+      x-swagger-router-controller: "Accounts"
+    x-swagger-router-controller: "accounts"
 
   /signIn:
     post:
@@ -476,6 +502,9 @@ definitions:
   password:
     type: "string"
     description: "A password"
+  language:
+    type: "string"
+    description: "A language"
 
 parameters:
   tokenParam:

@@ -25,7 +25,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy@test.com",
 						"name":"testy",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.expectStatus(201)
 					.end(function(err, res, body) {
@@ -43,7 +44,8 @@ module.exports = function(app, swagger) {
 						.post('/api/account')
 						.send({
 							"name":"testy",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.expectStatus(400)
 						.end(function(err, res, body) {
@@ -62,7 +64,8 @@ module.exports = function(app, swagger) {
 						.post('/api/account')
 						.send({
 							"email":"testy@test.com",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							done();
@@ -81,6 +84,7 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy@test.com",
 							"name":"testy",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							done();
@@ -92,13 +96,36 @@ module.exports = function(app, swagger) {
 				assert(false);
 				return done();
 			});
+			it('should not create account without language', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy@test.com",
+							"name":"testy",
+							"password":"abc123.ASDF"
+						})
+						.end(function(err, res, body) {
+							if(err) {
+								assert(true);
+								return done();
+							}
+							assert(false);
+							return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
 			it('should not create account with duplicate email', function(done) {
 				hippie(app, swagger)
 					.post('/api/account')
 					.send({
 						"email":"testy@test.com",
 						"name":"testy123",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -115,7 +142,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@test.com",
 						"name":"testy",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -132,7 +160,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@testy.com",
 						"name":"",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -149,7 +178,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@testy.com",
 						"name":"abc",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -166,7 +196,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@testy.com",
 						"name":"abcdeABCDEabcdeABCDEabcdeF",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -183,7 +214,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@testy.com",
 						"name":"abc def",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -200,7 +232,8 @@ module.exports = function(app, swagger) {
 					.send({
 						"email":"testy123@testy.com",
 						"name":"abc@def",
-						"password":"abc123.ASDF"
+						"password":"abc123.ASDF",
+						"language":"en"
 					})
 					.end(function(err, res, body) {
 						if (err) {
@@ -218,7 +251,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123testy.com",
 							"name":"abcdef",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -240,7 +274,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testycom",
 							"name":"abcdef",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -262,7 +297,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"@testy.com",
 							"name":"abcdef",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -284,7 +320,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@.com",
 							"name":"abcdef",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -306,7 +343,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.",
 							"name":"abcdef",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -328,7 +366,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.commmmmmmmmmmm",
 							"name":"abcdef",
-							"password":"abc123.ASDF"
+							"password":"abc123.ASDF",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -350,7 +389,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.com",
 							"name":"abcdef",
-							"password":"a1.A"
+							"password":"a1.A",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -372,7 +412,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.com",
 							"name":"abcdef",
-							"password":"aB@012345678901234567890123456788901234567890"
+							"password":"aB@012345678901234567890123456788901234567890",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -394,7 +435,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.com",
 							"name":"abcdef",
-							"password":"BADPASSWORD1!"
+							"password":"BADPASSWORD1!",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -416,7 +458,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.com",
 							"name":"abcdef",
-							"password":"badpassword1!"
+							"password":"badpassword1!",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -438,7 +481,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.com",
 							"name":"abcdef",
-							"password":"BadPassword!@#"
+							"password":"BadPassword!@#",
+							"language":"en"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -460,7 +504,54 @@ module.exports = function(app, swagger) {
 						.send({
 							"email":"testy123@testy.com",
 							"name":"abcdef",
-							"password":"BADPASSWORD123"
+							"password":"BADPASSWORD123",
+							"language":"en"
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with empty language', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"abc.123ASDF",
+							"language":""
+						})
+						.end(function(err, res, body) {
+							if (err) {
+								assert(true);
+							} else {
+								assert(false);
+							}
+	      						return done();
+						});
+				} catch(err) {
+					assert(true);
+					return done();
+				};
+			});
+			it('should not create account with bad language', function(done) {
+				try {
+					hippie(app, swagger)
+						.post('/api/account')
+						.send({
+							"email":"testy123@testy.com",
+							"name":"abcdef",
+							"password":"abc.123ASDF",
+							"language":"badlanguage"
 						})
 						.end(function(err, res, body) {
 							if (err) {
@@ -644,7 +735,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(200)
 									.end(function(err, res, body) {
@@ -683,7 +775,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(400)
 									.end(function(err, res, body) {
@@ -704,7 +797,8 @@ module.exports = function(app, swagger) {
 						.send({
 							"name":"testy1",
 							"email":"testy1@test.com",
-							"password":"qwerqwer.3QWER"
+							"password":"qwerqwer.3QWER",
+							"language":"fr"
 						})
 						.expectStatus(400)
 						.end(function(err, res, body) {
@@ -741,7 +835,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -780,7 +875,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"abc",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -819,7 +915,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"abcdeABCDEabcdeABCDEabcdeF",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -858,7 +955,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"abc def",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -897,7 +995,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"abc#def",
 										"email":"testy1@test.com",
-										"password":"qwerqwer.3QWER"
+										"password":"qwerqwer.3QWER",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -937,7 +1036,8 @@ module.exports = function(app, swagger) {
 										.send({
 											"name":"abcdef",
 											"email":"testy1test.com",
-											"password":"qwerqwer.3QWER"
+											"password":"qwerqwer.3QWER",
+											"language":"fr"
 										})
 										.expectStatus(500)
 										.end(function(err, res, body) {
@@ -981,7 +1081,8 @@ module.exports = function(app, swagger) {
 										.send({
 											"name":"abcdef",
 											"email":"testy1@testcom",
-											"password":"qwerqwer.3QWER"
+											"password":"qwerqwer.3QWER",
+											"language":"fr"
 										})
 										.expectStatus(500)
 										.end(function(err, res, body) {
@@ -1025,7 +1126,8 @@ module.exports = function(app, swagger) {
 										.send({
 											"name":"abcdef",
 											"email":"@test.com",
-											"password":"qwerqwer.3QWER"
+											"password":"qwerqwer.3QWER",
+											"language":"fr"
 										})
 										.expectStatus(500)
 										.end(function(err, res, body) {
@@ -1069,7 +1171,8 @@ module.exports = function(app, swagger) {
 										.send({
 											"name":"abcdef",
 											"email":"testy1@.com",
-											"password":"qwerqwer.3QWER"
+											"password":"qwerqwer.3QWER",
+											"language":"fr"
 										})
 										.expectStatus(500)
 										.end(function(err, res, body) {
@@ -1113,7 +1216,8 @@ module.exports = function(app, swagger) {
 										.send({
 											"name":"abcdef",
 											"email":"testy1@test.",
-											"password":"qwerqwer.3QWER"
+											"password":"qwerqwer.3QWER",
+											"language":"fr"
 										})
 										.expectStatus(500)
 										.end(function(err, res, body) {
@@ -1157,7 +1261,8 @@ module.exports = function(app, swagger) {
 										.send({
 											"name":"abcdef",
 											"email":"testy1@test.commmmmmmmmmm",
-											"password":"qwerqwer.3QWER"
+											"password":"qwerqwer.3QWER",
+											"language":"fr"
 										})
 										.expectStatus(500)
 										.end(function(err, res, body) {
@@ -1200,7 +1305,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"aBc1@3"
+										"password":"aBc1@3",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -1239,7 +1345,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"aB@01234567890123456789012345678901234567890"
+										"password":"aB@01234567890123456789012345678901234567890",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -1278,7 +1385,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"BADPASSWORD1!"
+										"password":"BADPASSWORD1!",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -1317,7 +1425,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"badpassword1!"
+										"password":"badpassword1!",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -1356,7 +1465,8 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"badpassword!!!"
+										"password":"badpassword!!!",
+										"language":"fr"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -1395,7 +1505,45 @@ module.exports = function(app, swagger) {
 									.send({
 										"name":"testy1",
 										"email":"testy1@test.com",
-										"password":"BadPassword123"
+										"password":"BadPassword123",
+										"language":"fr"
+									})
+									.expectStatus(500)
+									.end(function(err, res, body) {
+										if(err) {
+											assert(true);
+											return done();
+										} else {
+											assert(false);
+											return done();
+										}
+									});
+							} else {
+								assert(false);
+								return done();
+							}
+						}
+					});
+			});
+			it('should not update account with a bad language', function(done) {
+				hippie(app, swagger)
+					.post('/api/signIn')
+					.send({
+						"name":"testy1",
+						"password":"qwerqwer.3QWER"
+					})
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if (err) {
+		 					assert(false);
+							return done();
+						} else {
+							if(body && body.token) {
+								hippie(app, swagger)
+									.header('x-access-token',body.token)
+									.patch('/api/account')
+									.send({
+										"language":"badlanguage"
 									})
 									.expectStatus(500)
 									.end(function(err, res, body) {
@@ -1870,6 +2018,58 @@ module.exports = function(app, swagger) {
 					assert(true);
 					return done();
 				}
+			});
+		});
+		describe('Check Language', function() {
+			it('should approve a potential language', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/language')
+					.send("en")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(false);
+							return done();
+						} else {
+							assert(JSON.parse(res.body));
+							return done();
+						}
+					});
+			});
+			it('should not approve an empty language', function(done) {
+				try {
+				hippie(app, swagger)
+					.post('/api/account/check/language')
+					.send("")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(true);
+							return done();
+						} else {
+							assert(!JSON.parse(res.body));
+							return done();
+						}
+					});
+				} catch(e) {
+					assert(true);
+					return done();
+				}
+			});
+			it('should not approve a bad language', function(done) {
+				hippie(app, swagger)
+					.post('/api/account/check/language')
+					.send("badlanguage")
+					.expectStatus(200)
+					.end(function(err, res, body) {
+						if(err) {
+							assert(true);
+							return done();
+						} else {
+							assert(!JSON.parse(res.body));
+							return done();
+						}
+					});
 			});
 		});
 		describe('Verify Email', function() {

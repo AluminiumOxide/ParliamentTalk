@@ -160,7 +160,8 @@ describe("Account", function() {
 			var data = { 
 				'name':'testy',
 				'email':'test@testy.com',
-				'password':'passy'
+				'password':'passy',
+				'language':'en'
 			};
 			var req = genReq(data);
 			var res = genRes();
@@ -176,6 +177,10 @@ describe("Account", function() {
 				.expects('setPassword')
 				.withArgs(data.password)
 				.returns(true);
+			UserMock
+				.expects('setLanguage')
+				.withArgs(data.language)
+				.returns(true);
 			return when(Account.createAccount(req, res, genNext()))
 				.then(() => {
 					assert.equal(res.statusCode,201);
@@ -186,7 +191,8 @@ describe("Account", function() {
 			var data = { 
 				'name':'',
 				'email':'test@testy.com',
-				'password':'passy'
+				'password':'passy',
+				'language':'en'
 			};
 			var req = genReq(data);
 			var res = genRes();
@@ -201,6 +207,10 @@ describe("Account", function() {
 			UserMock
 				.expects('setPassword')
 				.withArgs(data.password)
+				.returns(true);
+			UserMock
+				.expects('setLanguage')
+				.withArgs(data.language)
 				.returns(true);
 			return when(Account.createAccount(req, res, genNext()))
 				.then(() => {
@@ -214,7 +224,8 @@ describe("Account", function() {
 			var data = { 
 				'name':'testy',
 				'email':'',
-				'password':'passy'
+				'password':'passy',
+				'language':'en'
 			};
 			var req = genReq(data);
 			var res = genRes();
@@ -230,6 +241,10 @@ describe("Account", function() {
 				.expects('setPassword')
 				.withArgs(data.password)
 				.returns(true);
+			UserMock
+				.expects('setLanguage')
+				.withArgs(data.language)
+				.returns(true);
 			return when(Account.createAccount(req, res, genNext()))
 				.then(() => {
 					assert.equal(res.statusCode,400);
@@ -242,7 +257,8 @@ describe("Account", function() {
 			var data = { 
 				'name':'testy',
 				'email':'test@testy.com',
-				'password':''
+				'password':'',
+				'language':'en'
 			};
 			var req = genReq(data);
 			var res = genRes();
@@ -257,6 +273,43 @@ describe("Account", function() {
 			UserMock
 				.expects('setPassword')
 				.withArgs(data.password)
+				.returns(false);
+			UserMock
+				.expects('setLanguage')
+				.withArgs(data.language)
+				.returns(true);
+			return when(Account.createAccount(req, res, genNext()))
+				.then(() => {
+					assert.equal(res.statusCode,400);
+					assert.equal(JSON.parse(res.resData).field,'password');
+					assert.equal(JSON.parse(res.resData).error,'Invalid password');
+				});
+		});
+
+		it("should not create account without language", () => {
+			var data = { 
+				'name':'testy',
+				'email':'test@testy.com',
+				'password':'ab@123F',
+				'language':''
+			};
+			var req = genReq(data);
+			var res = genRes();
+			UserMock
+				.expects('setName')
+				.withArgs(data.name)
+				.returns(true);
+			UserMock
+				.expects('setEmail')
+				.withArgs(data.email)
+				.returns(true);
+			UserMock
+				.expects('setPassword')
+				.withArgs(data.password)
+				.returns(false);
+			UserMock
+				.expects('setLanguage')
+				.withArgs(data.language)
 				.returns(false);
 			return when(Account.createAccount(req, res, genNext()))
 				.then(() => {
@@ -310,7 +363,8 @@ describe("Account", function() {
 					var data2 = {
 						'name':'testy1',
 						'email':'testy1@test.com',
-						'password':'passy1'
+						'password':'passy1',
+						'language':'fr'
 					};
 					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
 					var res2 = genRes();
@@ -324,6 +378,9 @@ describe("Account", function() {
 					userMock.expects('setPassword')
 						.withArgs(data2.password)
 					 	.returns(true);
+					userMock.expects('setLanguage')
+						.withArgs(data2.language)
+						.returns(true);
 					return when(Account.updateAccount(req2, res2, genNext()))
 						.then(() => {
 							assert.equal(res2.statusCode,200);
@@ -438,7 +495,7 @@ describe("Account", function() {
 						});
 				});
 		});
-		it("should update only name and email", () => {
+		it("should update only language", () => {
 			var data1 = { 
 				'name':'testy',
 				'password':'passy'
@@ -460,97 +517,13 @@ describe("Account", function() {
 			return when(Authentication.signIn(req1, res1, genNext()))
 				.then(() => {
 					var data2 = {
-						'name':'testy1',
-						'email':'testy1@test.com'
+						'language':'fr'
 					};
 					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
 					var res2 = genRes();
 					var userMock = ctx.mock(user);
-					userMock.expects('setName')
-						.withArgs(data2.name)
-						.returns(true);
-					userMock.expects('setEmail')
-						.withArgs(data2.email)
-						.returns(true);
-					return when(Account.updateAccount(req2, res2, genNext()))
-						.then(() => {
-							assert.equal(res2.statusCode,200);
-						});
-				});
-		});
-		it("should update only name and password", () => {
-			var data1 = { 
-				'name':'testy',
-				'password':'passy'
-			};
-			var req1 = genReq(data1);
-			var res1 = genRes();
-			user = new User();
-			UserFindOneStub = ctx.stub(User,'findOne',function(){
-				return {exec: function(){return user;}}
-			});
-			UserMock.expects('matchPassword')
-				.withArgs(data1.password)
-				.returns(true);
-			UserMock.expects('generateLogin')
-				.returns('asdfasdf');
-			ctx.stub(User,'verifyLogin',function(args) { 
-				return user; 
-			});
-			return when(Authentication.signIn(req1, res1, genNext()))
-				.then(() => {
-					var data2 = {
-						'name':'testy1',
-						'password':'passy1'
-					};
-					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
-					var res2 = genRes();
-					var userMock = ctx.mock(user);
-					userMock.expects('setName')
-						.withArgs(data2.name)
-						.returns(true);
-					userMock.expects('setPassword')
-						.withArgs(data2.password)
-					 	.returns(true);
-					return when(Account.updateAccount(req2, res2, genNext()))
-						.then(() => {
-							assert.equal(res2.statusCode,200);
-						});
-				});
-		});
-		it("should update only email and password", () => {
-			var data1 = { 
-				'name':'testy',
-				'password':'passy'
-			};
-			var req1 = genReq(data1);
-			var res1 = genRes();
-			user = new User();
-			UserFindOneStub = ctx.stub(User,'findOne',function(){
-				return {exec: function(){return user;}}
-			});
-			UserMock.expects('matchPassword')
-				.withArgs(data1.password)
-				.returns(true);
-			UserMock.expects('generateLogin')
-				.returns('asdfasdf');
-			ctx.stub(User,'verifyLogin',function(args) { 
-				return user; 
-			});
-			return when(Authentication.signIn(req1, res1, genNext()))
-				.then(() => {
-					var data2 = {
-						'email':'testy1@test.com',
-						'password':'passy1'
-					};
-					var req2 = genReq(data2,{'x-access-token':JSON.parse(res1.resData).token});
-					var res2 = genRes();
-					var userMock = ctx.mock(user);
-					userMock.expects('setEmail')
-						.withArgs(data2.email)
-						.returns(true);
-					userMock.expects('setPassword')
-						.withArgs(data2.password)
+					userMock.expects('setLanguage')
+						.withArgs(data2.language)
 					 	.returns(true);
 					return when(Account.updateAccount(req2, res2, genNext()))
 						.then(() => {
@@ -1091,6 +1064,43 @@ describe("Account", function() {
 			var req1 = genReq(JSON.stringify('BadPassword123'),{});
 			var res1 = genRes();
 			return when(Account.checkPassword(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+	});
+	context(".checkLanguage", function() {
+
+		var ctx = '';
+
+		beforeEach(function() {
+			ctx = sinon.sandbox.create();
+		});
+
+		afterEach(function() {
+			ctx.restore();
+		});
+
+		it("should approve a potential language", () => {
+			var req1 = genReq(JSON.stringify('en'),{});
+			var res1 = genRes();
+			return when(Account.checkLanguage(req1, res1, genNext()))
+				.then(() => {
+					assert(JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve an empty potential language", () => {
+			var req1 = genReq('',{});
+			var res1 = genRes();
+			return when(Account.checkLanguage(req1, res1, genNext()))
+				.then(() => {
+					assert(!JSON.parse(res1.resData));
+				});
+		});
+		it("should not approve an bad potential language", () => {
+			var req1 = genReq(JSON.stringify('badlang'),{});
+			var res1 = genRes();
+			return when(Account.checkLanguage(req1, res1, genNext()))
 				.then(() => {
 					assert(!JSON.parse(res1.resData));
 				});

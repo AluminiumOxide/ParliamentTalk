@@ -40,7 +40,6 @@ exports.viewAccount = function(req, res, next) {
  */
 exports.createAccount = function(req, res, next) {
 
-	var args = (req && req.swagger && req.swagger.params) ? req.swagger.params : "";
 	var account = new User();
 	
 	// check and set the name
@@ -78,13 +77,30 @@ exports.createAccount = function(req, res, next) {
 								}));
 								return next();
 							}
+
+							// check and set language preference
+							return when(account.setLanguage(req.body.language))
+								.then(success => {
+									if(!success) {
+										res.statusCode = 400;
+										res.end(JSON.stringfy({
+											error: 'Unsupported language',
+											field: 'lang'
+										}));
+										return next();
+									}
 		
-							// save the new user
-							return when(account.save())
-								.then(() => {
-									res.statusCode = 201;
-									res.end();
-									return next();
+									// save the new user
+									return when(account.save())
+										.then(() => {
+											res.statusCode = 201;
+											res.end();
+											return next();
+										}).otherwise(err => {
+											res.statusCode = 500;
+											res.end();
+											return next();
+										});
 								}).otherwise(err => {
 									res.statusCode = 500;
 									res.end();
@@ -115,7 +131,6 @@ exports.createAccount = function(req, res, next) {
  *                              <li> 201 on success, with json body: { _id: string, name: string, email: string } </li>
  */
 exports.updateAccount = function(req, res, next) {
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
 	return when(verifyLogin(req))
 		.then(user => {
 
@@ -134,6 +149,11 @@ exports.updateAccount = function(req, res, next) {
 			if(!!req.body.password) {
 				todo.push(new Promise((resolve,reject) => {
 					resolve(user.setPassword(req.body.password)); 
+				}));
+			}
+			if(!!req.body.lang && req.body.lang !== user.lang) {
+				todo.push(new Promise((resolve,reject) => {
+					resolve(user.setLanguage(req.body.language));
 				}));
 			}
 
@@ -176,6 +196,7 @@ exports.updateAccount = function(req, res, next) {
 			return next();
 		});
 }
+
 /**
  * Sets account to deleted
  * @param {http.request} req - The request object, with x-access-token headers set
@@ -184,7 +205,6 @@ exports.updateAccount = function(req, res, next) {
  *                              <li> 200 on success, with json body: { _id: string, name: string, email: string } </li>
  */ 
 exports.deleteAccount = function(req, res, next) {
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
 
 	// check the user's login
 	return when(verifyLogin(req))
@@ -264,14 +284,27 @@ exports.checkPassword = function(req,res,next) {
 };
 
 /**
+ * Checks a potential preferred language
+ * @param {http.request} req - The request object
+ * @param {http.response} res - The response object:
+ * 								<li>200 with boolean body</li>
+ */
+exports.checkLanguage = function(req,res,next) {
+	return when(User.checkLanguage((req && req.body) ? JSON.parse(req.body): ""))
+		.then(result => {
+			res.statusCode = 200;
+			res.end(result.toString());
+			return next();
+		});
+};
+
+/**
  * Verifies an email address
  * @param {http.request} req - The request object
  * @param {http.response} res - The response object:
  * 								<li>200 with boolean body</li>
  */
 exports.verifyEmail = function(req, res, next) {
-
-	var args = (req && req.params && req.swagger.params) ? req.swagger.params : "";
 	if(!!req.body.email || !!req.body.verificationCode) {
 		if(!!req.body.email && !!req.body.verificationCode) {
 			return when(User.verifyEmailVerification(req.body.email,req.body.verificationCode))
