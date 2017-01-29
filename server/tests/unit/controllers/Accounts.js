@@ -4,6 +4,7 @@ var assert = require('assert');
 var sinon = require('sinon');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
+var emailer = require('../../../src/lib/emailer');
 require('../../../src/models/users');
 
 /*** Helper Functions ***/
@@ -40,6 +41,7 @@ describe("Account", function() {
 	var Account = require('../../../src/controllers/Accounts');
 	var Authentication = require('../../../src/controllers/Authentication');
 	var User = mongoose.model('User');
+	var emailerInst = emailer.getInstance();
 
 	/*** View ***/
 	context(".view", function() {
@@ -1131,6 +1133,7 @@ describe("Account", function() {
 				ctx.stub(User.prototype,'generateEmailVerification',function() { return true; });	
 				user = new User();
 				ctx.stub(User,'verifyLogin',function() { return user; });
+				ctx.stub(emailerInst,'sendEmail',function() { return when(true); });
 				return when(Account.verifyEmail(req,res,genNext()))
 					.then(() => {
 						assert.equal(JSON.parse(res.resData),true);
@@ -1274,6 +1277,7 @@ describe("Account", function() {
 				var req = genReq({'email':'testy@test.com'},{});
 				var res = genRes();
 				ctx.stub(User,'generateAccountRecovery',function(){return true;});
+				ctx.stub(emailerInst,'sendEmail',function() { return when(true); });
 				return when(Account.recoverDeleted(req,res,genNext()))
 					.then(() => {
 						assert.equal(JSON.parse(res.resData),true);
@@ -1487,6 +1491,7 @@ describe("Account", function() {
 			UserFindOneStub = ctx.stub(User,'findOne',function(){
 				return {exec: function(){return user;}}
 			});
+			ctx.stub(emailerInst,'sendEmail',function() { return when(true); });
 			return when(Account.recoverUsername(req,res,genNext()))
 				.then(() => {
 					assert.equal(JSON.parse(res.resData),true);
@@ -1543,6 +1548,7 @@ describe("Account", function() {
 				var req = genReq({'email':'testy@test.com'},{});
 				var res = genRes();
 				ctx.stub(User,'generatePasswordRecovery',function(){return true;});
+				ctx.stub(emailerInst,'sendEmail',function() { return when(true); });
 				return when(Account.recoverPassword(req,res,genNext()))
 					.then(() => {
 						assert.equal(JSON.parse(res.resData),true);

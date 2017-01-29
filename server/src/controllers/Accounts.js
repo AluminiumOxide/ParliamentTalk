@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 var when = require('when');
 var User = mongoose.model('User');
 var emailer = require('../lib/emailer');
+var emailerInst = emailer.getInstance();
 
 /**
  * View user data
@@ -334,7 +335,7 @@ exports.verifyEmail = function(req, res, next) {
 				return when(user.generateEmailVerification())
 					.then(generated => {
 						if(generated) {
-							return when(emailer.sendEmail('emailVerify',user._id))
+							return when(emailerInst.sendEmail('emailVerify',user._id))
 								.then(() => {
 									res.statusCode = 200;
 									res.end(JSON.stringify(true));
@@ -390,7 +391,7 @@ exports.recoverDeleted = function(req, res, next) {
 			return when(User.generateAccountRecovery(req.body.email))
 				.then(generated => {
 					if(generated) {
-						return when(emailer.sendEmail('accountRecovery',generated._id))
+						return when(emailerInst.sendEmail('accountRecovery',generated._id))
 							.then(() => {
 								res.statusCode = 200;
 								res.end(JSON.stringify(true));
@@ -426,7 +427,7 @@ exports.recoverUsername = function(req, res, next) {
 		return when(User.findOne({email:req.body.email}).exec())
 			.then(user => {
 				if(!!user) {
-					return when(emailer.sendEmail('nameRecovery',user._id))
+					return when(emailerInst.sendEmail('nameRecovery',user._id))
 						.then(() => {
 							res.statusCode = 200;
 							res.end(JSON.stringify(true));
@@ -480,7 +481,7 @@ exports.recoverPassword = function(req, res, next) {
 			return when(User.generatePasswordRecovery(req.body.email))
 				.then(generated => {
 					if(generated) {
-						return when(emailer.sendEmail('passwordRecovery',generated._id))
+						return when(emailerInst.sendEmail('passwordRecovery',generated._id))
 							.then(() => {
 								res.statusCode = 200;
 								res.end(JSON.stringify(true));

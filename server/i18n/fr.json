@@ -2,5 +2,12 @@
 	"@metadata": {
 		"locale":"fr"
 	},
-	"test":"French French French"
+	"email_title_emailVerify":"French French French",
+	"email_body_emailVerify":"French French French",
+	"email_title_accountRecovery":"French French French",
+	"email_body_accountRecovery":"French French French",
+	"email_title_nameRecovery":"French French French",
+	"email_body_nameRecovery":"French French French",
+	"email_title_passwordRecovery":"French French French",
+	"email_body_passwordRecovery":"French French French"
 }

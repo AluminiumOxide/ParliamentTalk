@@ -2,5 +2,15 @@
 	"@metadata": {
 		"locale":"en"
 	},
-	"test":"Test Test Test"
+	"app_name":"ParliamentTalk",
+	"app_site":"http://www.parliament-talk.ca",
+	"app_email":"admin@parliament-talk.ca",
+	"email_title_emailVerify":"{{app_name}} - Email Verification",
+	"email_body_emailVerify":"Hello {{name}}!\nThank you for verifying your email! Please click the following link, to complete verification.\n{{app_site}}/api/account/verify/email?email={{email}}&code={{verified.code}}\nKeep being awesome!\n{{app_name}}",
+	"email_title_accountRecovery":"{{app_name}} - Account Recovery",
+	"email_body_accountRecovery":"Hi {{name}}!\nWe're glad to have you back! Please click the following link, to finish recovering your account.\n{{app_site}}/api/account/recover/deleted?email={{email}}&code={{recovery.code}}\nCheers,\n{{app_name}}",
+	"email_title_nameRecovery":"{{app_name}} - User Name Reminder",
+	"email_body_nameRecovery":"Psst!\nWord has it, you need a user name reminder. It's {{name}}.\nHave a great day!\n{{app_name}}",
+	"email_title_passwordRecovery":"{{app_name}} - Forgotten Password Recovery",
+	"email_body_passwordRecovery":"Hey {{name}}!\nYour password is almost recovered! Please click the following link, to finish recovering your password.\n{{app_site}}/api/account/recover/password?email={{email}}&code={{recovery.code}}\nAll the best,\n{{app_name}}"
 }

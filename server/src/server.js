@@ -12,6 +12,7 @@ module.exports = function(env) {
 	var serverPort = 8080;
 	var when = require('when');
 	var i18n = require('./lib/i18n');
+	var emailer = require('./lib/emailer');
 	
 	/*** Files ***/
 	require('./models/users');
@@ -34,6 +35,11 @@ module.exports = function(env) {
 	var spec = fs.readFileSync('./api/swagger.yaml', 'utf8');
 	var swaggerDoc = jsyaml.safeLoad(spec);
 
+	// Connect to emailer if we're not in tests
+	var emailString = require('../config/email').smtp;
+	var emailerInst = emailer.getInstance();
+	emailerInst.config(appEnv,emailString);	
+	
 	var deferred = when.defer();
 
 	// Connect to the testing database if we're in tests
@@ -41,7 +47,7 @@ module.exports = function(env) {
 	if(appEnv === 'test') {
 		connectionString = 'mongodb://db:27017/ptalktest';
 	}
-	
+
 	mongoose.Promise = global.Promise;
 	when(mongoose.connect(connectionString))
 		.then(r => {
@@ -72,8 +78,8 @@ module.exports = function(env) {
      	 				deferred.resolve(app);
 				}).otherwise(err => {
 					deferred.reject(err);
-     	 			});
-    				});
+     	 		});
+    		});
   		}).otherwise(err => {
     			deferred.reject(err);
   		});

@@ -14,9 +14,17 @@ exports.getInit = function() {
 	return i18n.init;
 };
 
-exports.__ = function(key) {
+exports.__ = function(key,obj) {
 	this.configure();
-	return i18n.__(key);
+
+	var catalog = i18n.getCatalog()[i18n.getLocale()]; 
+
+	if(obj) {
+		var cpy = Object.assign(obj.toObject(),catalog);
+		return i18n.__(key,cpy);
+	} else {
+		return i18n.__(key,catalog);
+	}
 };
 
 exports.getLocales = function() {
