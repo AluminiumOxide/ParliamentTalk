@@ -3,3 +3,4 @@ node_modules
 coverage
 build
 .npm-install-changed.json
+config/email.js
